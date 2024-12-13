@@ -1,0 +1,447 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN // Full access to everything
+  TEAM // Access to admin dashboard with limited permissions
+  CUSTOMER // Regular customer access
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  firstName     String?
+  lastName      String?
+  role          UserRole   @default(CUSTOMER)
+  status        UserStatus @default(ACTIVE)
+  emailVerified DateTime?
+  lastLogin     DateTime?
+  metadata      Json? // For additional user data
+  orders        Order[]
+  addresses     Address[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  isActive      Boolean    @default(true)
+
+  // Store specific fields for ADMIN users
+  storeId     String? // Only set for ADMIN users
+  permissions String[] // Array of permission keys
+}
+
+// Store settings and configuration
+model Store {
+  id           String         @id @default(cuid())
+  name         String
+  description  String?
+  domain       String?        @unique
+  logo         String?
+  settings     Json? // Store configuration
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  ShippingZone ShippingZone[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  sku         String      @unique
+  price       Decimal     @db.Decimal(10, 2)
+  images      String[]
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  inventory   Int         @default(0)
+  orderItems  OrderItem[]
+  isActive    Boolean     @default(true)
+  metadata    Json? // For additional product attributes
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+  @@index([sku])
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  image       String?
+  products    Product[]
+  parentId    String? // For nested categories
+  parent      Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  children    Category[] @relation("SubCategories")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id])
+  status            OrderStatus   @default(PENDING)
+  items             OrderItem[]
+  total             Decimal
+  shippingAddress   Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  shippingAddressId String?
+  billingAddress    Address?      @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  billingAddressId  String?
+  paymentIntent     String? // Stripe payment intent ID
+  paymentStatus     PaymentStatus @default(PENDING)
+  shippingMethod    String?
+  trackingNumber    String?
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // Specify precision for money
+}
+
+model Address {
+  id             String   @id @default(cuid())
+  userId         String? // Made optional
+  user           User?    @relation(fields: [userId], references: [id])
+  email          String // Added for guest checkouts
+  firstName      String
+  lastName       String
+  company        String?
+  street         String
+  apartment      String?
+  city           String
+  state          String
+  postalCode     String
+  country        String
+  phone          String?
+  isDefault      Boolean  @default(false)
+  shippingOrders Order[]  @relation("ShippingAddress")
+  billingOrders  Order[]  @relation("BillingAddress")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Settings {
+  id             String   @id @default(cuid())
+  logo           Media?   @relation("LogoImage", fields: [logoId], references: [id])
+  logoId         String?  @unique
+  favicon        Media?   @relation("FaviconImage", fields: [faviconId], references: [id])
+  faviconId      String?  @unique
+  theme          Theme    @relation(fields: [themeId], references: [id])
+  themeId        String
+  contactEmail   String?
+  contactPhone   String?
+  address        String?
+  socialLinks    Json? // { facebook?: string, twitter?: string, instagram?: string }
+  metaTags       Json? // SEO configuration
+  analytics      Json? // Analytics tracking IDs
+  currency       String   @default("USD")
+  locale         String   @default("en")
+  timezone       String   @default("UTC")
+  features       Json? // Enabled/disabled features
+  checkoutConfig Json? // Checkout configuration
+  shippingZones  Json? // Shipping configuration
+  taxConfig      Json? // Tax rules and rates
+  paymentConfig  Json? // { stripeEnabled: boolean, stripePublishableKey: string, stripeSecretKey: string, stripeWebhookSecret: string, paymentMethods: { card: boolean, applePay: boolean, googlePay: boolean } }
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Theme {
+  id              String     @id @default(cuid())
+  name            String
+  primaryColor    String // HEX or RGB value
+  secondaryColor  String
+  accentColor     String
+  backgroundColor String
+  textColor       String
+  buttonStyles    Json // Store button styling configuration
+  fontFamily      String
+  settings        Settings[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Page {
+  id         String     @id @default(cuid())
+  title      String
+  slug       String     @unique
+  content    Json // Structured content data
+  status     PageStatus @default(DRAFT)
+  layout     PageLayout @default(FULL_WIDTH)
+  isSystem   Boolean    @default(false) // For system pages like Home, About, etc.
+  template   Template?  @relation(fields: [templateId], references: [id])
+  templateId String?
+
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+
+  // Navigation
+  showInNavigation Boolean @default(true)
+  navigationLabel  String?
+  navigationOrder  Int?
+
+  // Permissions
+  visibility  PageVisibility @default(PUBLIC)
+  permissions Permission[]
+
+  // Timestamps
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  sections Section[]
+  parent   Page?     @relation("PageHierarchy", fields: [parentId], references: [id])
+  parentId String?
+  children Page[]    @relation("PageHierarchy")
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PageVisibility {
+  PUBLIC
+  PRIVATE
+  PASSWORD_PROTECTED
+}
+
+model Section {
+  id        String      @id @default(cuid())
+  page      Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  pageId    String
+  type      SectionType
+  title     String?
+  content   Json // Structured content based on section type
+  settings  Json? // Section-specific settings
+  style     Json? // Section-specific styling
+  order     Int
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([pageId, order])
+}
+
+model Media {
+  id         String    @id @default(cuid())
+  name       String
+  url        String // Will use Supabase storage URL
+  bucketId   String // Supabase storage bucket
+  type       MediaType @default(IMAGE)
+  size       Int
+  mimeType   String?
+  alt        String?
+  logoFor    Settings? @relation("LogoImage")
+  faviconFor Settings? @relation("FaviconImage")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Navigation {
+  id        String         @id @default(cuid())
+  name      String // e.g., "Admin Sidebar", "Main Menu", "Footer Menu"
+  type      NavigationType
+  items     NavItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model NavItem {
+  id           String     @id @default(cuid())
+  navigation   Navigation @relation(fields: [navigationId], references: [id])
+  navigationId String
+  label        String
+  icon         String? // Icon identifier (e.g., "settings", "home")
+  link         String? // Internal link or external URL
+  order        Int
+  parentId     String? // For nested menu items
+  parent       NavItem?   @relation("SubItems", fields: [parentId], references: [id])
+  children     NavItem[]  @relation("SubItems")
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([navigationId, order])
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pages Page[]
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum PageLayout {
+  FULL_WIDTH
+  BOXED
+  SIDEBAR_LEFT
+  SIDEBAR_RIGHT
+}
+
+enum SectionType {
+  HERO
+  FEATURED_PRODUCTS
+  PRODUCT_GRID
+  TEXT_BLOCK
+  IMAGE_GALLERY
+  NEWSLETTER
+  TESTIMONIALS
+  CONTACT_FORM
+  CUSTOM_HTML
+  CATEGORY_SHOWCASE
+  BANNER
+  COUNTDOWN
+  SOCIAL_FEED
+  VIDEO
+  FAQ
+  PRICING_TABLE
+  TEAM_MEMBERS
+  BLOG_POSTS
+  ANNOUNCEMENT_BAR
+  COLLECTION_LIST
+  PROMOTION_BANNER
+  REVIEWS
+  SIZE_CHART
+  PRODUCT_COMPARISON
+  RELATED_PRODUCTS
+  RECENTLY_VIEWED
+  INSTAGRAM_FEED
+  STORE_LOCATOR
+}
+
+enum NavigationType {
+  ADMIN_SIDEBAR
+  MAIN_MENU
+  FOOTER_MENU
+  MOBILE_MENU
+}
+
+enum PageType {
+  LANDING
+  HOME
+  PRODUCTS
+  PRODUCT_DETAIL
+  CATEGORY
+  CHECKOUT
+  CART
+  ACCOUNT
+  CUSTOM
+}
+
+model Component {
+  id        String   @id @default(cuid())
+  name      String
+  type      String // Button, Card, Form, etc.
+  config    Json // Component configuration
+  style     Json? // Component-specific styling
+  isGlobal  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  thumbnail   String? // Preview image
+  type        PageType
+  sections    Json // Pre-configured sections
+  settings    Json? // Template-specific settings
+  isDefault   Boolean  @default(false)
+  pages       Page[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ShippingZone {
+  id        String         @id @default(uuid())
+  name      String
+  countries String[]
+  rates     ShippingRate[]
+  storeId   String
+  store     Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([storeId])
+}
+
+model ShippingRate {
+  id        String       @id @default(uuid())
+  name      String
+  price     Float
+  minWeight Float?
+  maxWeight Float?
+  minOrder  Float?
+  maxOrder  Float?
+  zoneId    String
+  zone      ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([zoneId])
+}
