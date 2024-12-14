@@ -110,78 +110,90 @@ export default function CustomersTable({
 
       <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full divide-y divide-gray-200 dark:divide-gray-800">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Phone
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Orders
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Total Spent
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Actions
+                  Customer Details
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-              {data.customers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="group hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                >
-                  <td className="px-4 py-3">
-                    <div className="font-medium">
-                      {customer.firstName} {customer.lastName}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">{customer.email}</td>
-                  <td className="px-4 py-3 text-sm">{customer.phone || "-"}</td>
-                  <td className="px-4 py-3 text-sm">{customer.totalOrders}</td>
-                  <td className="px-4 py-3 text-sm">
-                    ${customer.totalSpent.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        customer.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
-                      }`}
-                    >
-                      {customer.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openEditModal(customer)}
-                        className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCustomer(customer.id)}
-                        className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
-                    </div>
+              {data.customers.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                    No customers found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                data.customers.map((customer) => (
+                  <tr
+                    key={customer.id}
+                    className="block lg:table-row hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  >
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">Name:</span>
+                      <div className="font-medium text-right lg:text-left">
+                        {customer.firstName} {customer.lastName}
+                      </div>
+                    </td>
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">Email:</span>
+                      <div className="text-sm text-right lg:text-left">
+                        {customer.email}
+                      </div>
+                    </td>
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">Phone:</span>
+                      <div className="text-sm text-right lg:text-left">
+                        {customer.phone || "-"}
+                      </div>
+                    </td>
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">Orders:</span>
+                      <div className="text-sm text-right lg:text-left">
+                        {customer.totalOrders}
+                      </div>
+                    </td>
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">
+                        Total Spent:
+                      </span>
+                      <div className="text-sm text-right lg:text-left">
+                        ${customer.totalSpent.toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="flex justify-between px-4 py-3 lg:table-cell">
+                      <span className="font-medium lg:hidden">Status:</span>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          customer.status === "ACTIVE"
+                            ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
+                        }`}
+                      >
+                        {customer.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 lg:text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEditModal(customer)}
+                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCustomer(customer.id)}
+                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

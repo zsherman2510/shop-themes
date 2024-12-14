@@ -55,7 +55,7 @@ export default function UserTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex-1">
           <input
             type="text"
@@ -68,7 +68,7 @@ export default function UserTable({
         <select
           defaultValue={searchParams.role || "all"}
           onChange={(e) => handleRoleFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
+          className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100 sm:w-auto"
         >
           <option value="all">All Roles</option>
           <option value={UserRole.TEAM}>Team</option>
@@ -76,72 +76,93 @@ export default function UserTable({
         </select>
       </div>
 
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+      <div className="-mx-4 sm:mx-0 sm:rounded-lg sm:border sm:border-gray-200 sm:bg-white sm:dark:border-gray-800 sm:dark:bg-gray-900">
+        <div className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <div className="hidden sm:block">
+            <div className="border-b border-gray-200 dark:border-gray-800">
+              <div className="grid grid-cols-5 px-4 py-3">
+                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                   Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                </div>
+                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                   Email
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                </div>
+                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                   Role
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                </div>
+                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                   Status
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                </div>
+                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                   Joined
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {initialData.users.map((user) => (
-                <tr
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            {initialData.users.length === 0 ? (
+              <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                No users found.
+              </div>
+            ) : (
+              initialData.users.map((user) => (
+                <div
                   key={user.id}
-                  className="border-b border-gray-200 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
                   onClick={() => router.push(`/admin/users/${user.id}`)}
-                  style={{ cursor: "pointer" }}
+                  className="cursor-pointer border-b border-gray-200 bg-white last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
                 >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="font-medium">
-                          {user.firstName} {user.lastName}
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 gap-1 px-4 py-4 sm:grid-cols-5 sm:gap-4 sm:py-3">
+                    <div className="font-medium">
+                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400 sm:hidden">
+                        Name:{" "}
+                      </span>
+                      {user.firstName} {user.lastName}
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">{user.email}</td>
-                  <td className="px-4 py-3 text-sm">{user.role}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        user.status === UserStatus.ACTIVE
-                          ? "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                          : user.status === UserStatus.INACTIVE
-                            ? "bg-gray-50 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400"
-                            : "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {formatDate(user.createdAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <div className="text-sm">
+                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
+                        Email:{" "}
+                      </span>
+                      {user.email}
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
+                        Role:{" "}
+                      </span>
+                      {user.role}
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 sm:hidden">
+                        Status:{" "}
+                      </span>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          user.status === UserStatus.ACTIVE
+                            ? "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                            : user.status === UserStatus.INACTIVE
+                              ? "bg-gray-50 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400"
+                              : "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
+                        Joined:{" "}
+                      </span>
+                      {formatDate(user.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
       {initialData.pageCount > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {initialData.total} users total
           </div>
