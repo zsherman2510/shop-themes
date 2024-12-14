@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
         throw new Error("Access denied. Admin privileges required.");
       }
 
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       if (error instanceof Error) {

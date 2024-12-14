@@ -1,4 +1,4 @@
-import { Order, User, UserRole } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 
 export interface UserWithDetails {
   id: string;

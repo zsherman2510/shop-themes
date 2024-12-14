@@ -27,7 +27,7 @@ export function AuthForm() {
           password,
         });
         if (error) throw error;
-        router.push("/admin/dashboard");
+        router.push("/admin");
       } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,

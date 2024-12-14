@@ -3,8 +3,8 @@ import { OrderStatus } from "@prisma/client";
 export interface OrderWithDetails {
   id: string;
   orderNumber: string;
-  userId: string | null;
-  user: {
+  customerId: string | null;
+  customer: {
     email: string;
     firstName: string | null;
     lastName: string | null;

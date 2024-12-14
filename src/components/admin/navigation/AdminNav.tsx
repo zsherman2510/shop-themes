@@ -41,37 +41,37 @@ const AdminNav = () => {
   const navItems = [
     {
       title: "Dashboard",
-      href: "/dashboard",
+      href: "/admin/dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Products",
-      href: "/dashboard/products",
+      href: "/admin/products",
       icon: Package,
     },
     {
       title: "Orders",
-      href: "/dashboard/orders",
+      href: "/admin/orders",
       icon: ShoppingCart,
     },
     {
       title: "Customers",
-      href: "/dashboard/customers",
+      href: "/admin/customers",
       icon: Users,
     },
     {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings,
-    },
-    {
       title: "Pages",
-      href: "/dashboard/pages",
+      href: "/admin/pages",
       icon: FileText,
     },
     {
+      title: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+    },
+    {
       title: "Users",
-      href: "/dashboard/users",
+      href: "/admin/users",
       icon: Users,
     },
   ];
@@ -183,7 +183,6 @@ const AdminNav = () => {
       </>
     );
   }
-
   return (
     <nav
       className={`sticky top-0 h-screen transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 ${

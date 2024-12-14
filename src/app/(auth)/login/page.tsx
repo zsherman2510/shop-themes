@@ -1,7 +1,7 @@
 "use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Github, Mail } from "lucide-react";
 import { useState } from "react";
 
@@ -182,7 +182,7 @@ export default function CustomerLoginPage() {
               Forgot your password?
             </a>
             <p className="text-gray-600 dark:text-gray-400">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a
                 href="/register"
                 className="font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"

@@ -31,13 +31,11 @@ model User {
   email         String     @unique
   firstName     String?
   lastName      String?
-  role          UserRole   @default(CUSTOMER)
+  role          UserRole   @default(TEAM)
   status        UserStatus @default(ACTIVE)
   emailVerified DateTime?
   lastLogin     DateTime?
   metadata      Json? // For additional user data
-  orders        Order[]
-  addresses     Address[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   isActive      Boolean    @default(true)
@@ -97,8 +95,8 @@ model Category {
 model Order {
   id                String        @id @default(cuid())
   orderNumber       String        @unique
-  userId            String?
-  user              User?         @relation(fields: [userId], references: [id])
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+  customerId        String?
   status            OrderStatus   @default(PENDING)
   items             OrderItem[]
   total             Decimal
@@ -114,7 +112,7 @@ model Order {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  @@index([userId])
+  @@index([customerId])
   @@index([status])
 }
 
@@ -129,9 +127,9 @@ model OrderItem {
 }
 
 model Address {
-  id             String   @id @default(cuid())
-  userId         String? // Made optional
-  user           User?    @relation(fields: [userId], references: [id])
+  id             String    @id @default(cuid())
+  customerId     String? // Made optional
+  customer       Customer? @relation(fields: [customerId], references: [id])
   email          String // Added for guest checkouts
   firstName      String
   lastName       String
@@ -143,11 +141,11 @@ model Address {
   postalCode     String
   country        String
   phone          String?
-  isDefault      Boolean  @default(false)
-  shippingOrders Order[]  @relation("ShippingAddress")
-  billingOrders  Order[]  @relation("BillingAddress")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  isDefault      Boolean   @default(false)
+  shippingOrders Order[]   @relation("ShippingAddress")
+  billingOrders  Order[]   @relation("BillingAddress")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Settings {
@@ -444,4 +442,17 @@ model ShippingRate {
   updatedAt DateTime     @updatedAt
 
   @@index([zoneId])
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  status    String    @default("ACTIVE")
+  orders    Order[]
+  addresses Address[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

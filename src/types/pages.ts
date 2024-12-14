@@ -1,4 +1,4 @@
-import { Page, PageStatus } from "@prisma/client";
+import { PageStatus } from "@prisma/client";
 
 // Type for pages table display
 export interface PageListItem {
