@@ -1,17 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-export type Product = {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  images: string[];
-  categoryId: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  // ... other fields from your Prisma schema
-};
-
 export async function getProductsByCategory(categoryId: string) {
   return prisma.products.findMany({
     where: {
@@ -36,5 +24,17 @@ export async function getFeaturedProducts() {
       // You might need to add a 'featured' field to your Products model
     },
     take: 4,
+  });
+}
+
+// Add this to your existing products.ts file
+export async function getProducts() {
+  return prisma.products.findMany({
+    where: {
+      isActive: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 }

@@ -8,7 +8,7 @@ export default function StoreLayout({
   return (
     <>
       <Navbar />
-      {children}
+      <main className="pt-16">{children}</main>
     </>
   );
 }

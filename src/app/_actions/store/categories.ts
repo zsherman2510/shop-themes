@@ -12,11 +12,8 @@ export type Category = {
 
 export async function getCategories() {
   return prisma.categories.findMany({
-    where: {
-      // Add any filters you need
-    },
     orderBy: {
-      name: 'asc', // Optional: sort by name
+      name: "asc",
     },
   });
 }
