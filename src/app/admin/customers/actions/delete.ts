@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function deleteCustomer(id: string) {
   try {
     // Check if customer has any orders
-    const customerWithOrders = await prisma.customer.findUnique({
+    const customerWithOrders = await prisma.customers.findUnique({
       where: { id },
       select: {
         _count: {
@@ -22,7 +22,7 @@ export async function deleteCustomer(id: string) {
 
     if (customerWithOrders._count.orders > 0) {
       // If customer has orders, just update their status to INACTIVE
-      await prisma.customer.update({
+      await prisma.customers.update({
         where: { id },
         data: {
           status: "INACTIVE",
@@ -30,7 +30,7 @@ export async function deleteCustomer(id: string) {
       });
     } else {
       // If customer has no orders, we can safely delete them
-      await prisma.customer.delete({
+      await prisma.customers.delete({
         where: { id },
       });
     }

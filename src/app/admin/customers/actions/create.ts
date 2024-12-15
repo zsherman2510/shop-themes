@@ -10,7 +10,7 @@ export async function createCustomer(data: {
   phone?: string;
 }) {
   try {
-    const existingCustomer = await prisma.customer.findUnique({
+    const existingCustomer = await prisma.customers.findUnique({
       where: { email: data.email },
     });
 
@@ -18,7 +18,7 @@ export async function createCustomer(data: {
       throw new Error("Customer with this email already exists");
     }
 
-    const customer = await prisma.customer.create({
+    const customer = await prisma.customers.create({
       data: {
         ...data,
         status: "ACTIVE",

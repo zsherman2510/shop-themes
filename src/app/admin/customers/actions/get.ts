@@ -28,7 +28,7 @@ export async function getCustomers({
   try {
     const skip = (page - 1) * limit;
 
-    const where: Prisma.CustomerWhereInput = {
+    const where: Prisma.CustomersWhereInput = {
       ...(search && {
         OR: [
           { email: { contains: search, mode: "insensitive" } },
@@ -39,7 +39,7 @@ export async function getCustomers({
     };
 
     const [customers, count] = await Promise.all([
-      prisma.customer.findMany({
+      prisma.customers.findMany({
         where,
         select: {
           id: true,
@@ -60,7 +60,7 @@ export async function getCustomers({
         take: limit,
         skip,
       }),
-      prisma.customer.count({ where }),
+      prisma.customers.count({ where }),
     ]);
 
     const formattedCustomers: CustomerResponse[] = customers.map((customer) => ({
@@ -82,7 +82,7 @@ export async function getCustomers({
 
 export async function getCustomer(id: string) {
   try {
-    const customer = await prisma.customer.findUnique({
+    const customer = await prisma.customers.findUnique({
       where: { id },
       select: {
         id: true,

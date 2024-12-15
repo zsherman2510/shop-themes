@@ -34,7 +34,7 @@ export async function getProducts({
   try {
     const skip = (page - 1) * limit;
 
-    const where: Prisma.ProductWhereInput = {
+    const where: Prisma.ProductsWhereInput = {
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" } },
@@ -46,7 +46,7 @@ export async function getProducts({
     };
 
     const [products, count] = await Promise.all([
-      prisma.product.findMany({
+      prisma.products.findMany({
         where,
         select: {
           id: true,
@@ -70,7 +70,7 @@ export async function getProducts({
         take: limit,
         skip,
       }),
-      prisma.product.count({ where }),
+      prisma.products.count({ where }),
     ]);
 
     const formattedProducts: ProductResponse[] = products.map((product) => ({
@@ -91,7 +91,7 @@ export async function getProducts({
 
 export async function getProduct(id: string) {
   try {
-    const product = await prisma.product.findUnique({
+    const product = await prisma.products.findUnique({
       where: { id },
       select: {
         id: true,

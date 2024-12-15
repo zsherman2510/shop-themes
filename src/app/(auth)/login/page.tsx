@@ -43,7 +43,7 @@ export default function CustomerLoginPage() {
       });
 
       if (error) throw error;
-      router.push("/account"); // Redirect to customer account page
+      router.push("/"); // Redirect to customer account page
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

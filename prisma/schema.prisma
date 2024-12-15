@@ -1,136 +1,115 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN // Full access to everything
-  TEAM // Access to admin dashboard with limited permissions
-  CUSTOMER // Regular customer access
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  BANNED
-}
-
-model User {
+model Users {
   id            String     @id @default(uuid())
   email         String     @unique
-  firstName     String?
-  lastName      String?
-  role          UserRole   @default(TEAM)
-  status        UserStatus @default(ACTIVE)
-  emailVerified DateTime?
-  lastLogin     DateTime?
-  metadata      Json? // For additional user data
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  emailVerified DateTime?
+  firstName     String?
+  lastLogin     DateTime?
+  lastName      String?
+  metadata      Json?
+  permissions   String[]
+  status        UserStatus @default(ACTIVE)
+  storeId       String?
+  role          UserRole   @default(TEAM)
   isActive      Boolean    @default(true)
-
-  // Store specific fields for ADMIN users
-  storeId     String? // Only set for ADMIN users
-  permissions String[] // Array of permission keys
 }
 
-// Store settings and configuration
-model Store {
-  id           String         @id @default(cuid())
-  name         String
-  description  String?
-  domain       String?        @unique
-  logo         String?
-  settings     Json? // Store configuration
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  ShippingZone ShippingZone[]
+model Stores {
+  id            String          @id @default(cuid())
+  name          String
+  description   String?
+  domain        String?         @unique
+  logo          String?
+  settings      Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  shippingZones ShippingZones[]
 }
 
-model Product {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  sku         String      @unique
-  price       Decimal     @db.Decimal(10, 2)
-  images      String[]
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  categoryId  String?
-  inventory   Int         @default(0)
-  orderItems  OrderItem[]
-  isActive    Boolean     @default(true)
-  metadata    Json? // For additional product attributes
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+model Products {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  price          Decimal          @db.Decimal(10, 2)
+  images         String[]
+  categoryId     String?
+  inventory      Int              @default(0)
+  isActive       Boolean          @default(true)
+  metadata       Json?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  sku            String           @unique
+  type           ProductType      @default(PHYSICAL)
+  digitalProduct DigitalProducts?
+  orderItems     OrderItems[]
+  category       Categories?      @relation(fields: [categoryId], references: [id])
 
   @@index([categoryId])
   @@index([sku])
 }
 
-model Category {
-  id          String     @id @default(cuid())
+model Categories {
+  id          String       @id @default(cuid())
   name        String
-  slug        String     @unique
+  slug        String       @unique
   description String?
   image       String?
-  products    Product[]
-  parentId    String? // For nested categories
-  parent      Category?  @relation("SubCategories", fields: [parentId], references: [id])
-  children    Category[] @relation("SubCategories")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  parentId    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  parent      Categories?  @relation("SubCategories", fields: [parentId], references: [id])
+  children    Categories[] @relation("SubCategories")
+  products    Products[]
 }
 
-model Order {
+model Orders {
   id                String        @id @default(cuid())
   orderNumber       String        @unique
-  customer          Customer?     @relation(fields: [customerId], references: [id])
-  customerId        String?
   status            OrderStatus   @default(PENDING)
-  items             OrderItem[]
   total             Decimal
-  shippingAddress   Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
   shippingAddressId String?
-  billingAddress    Address?      @relation("BillingAddress", fields: [billingAddressId], references: [id])
   billingAddressId  String?
-  paymentIntent     String? // Stripe payment intent ID
+  paymentIntent     String?
   paymentStatus     PaymentStatus @default(PENDING)
   shippingMethod    String?
   trackingNumber    String?
   notes             String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+  customerId        String?
+  guestEmail        String?
+  guestName         String?
+  items             OrderItems[]
+  billingAddress    Addresses?    @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  customer          Customers?    @relation(fields: [customerId], references: [id])
+  shippingAddress   Addresses?    @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
 
   @@index([customerId])
   @@index([status])
 }
 
-model OrderItem {
-  id        String  @id @default(cuid())
+model OrderItems {
+  id        String   @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Decimal @db.Decimal(10, 2) // Specify precision for money
+  price     Decimal  @db.Decimal(10, 2)
+  order     Orders   @relation(fields: [orderId], references: [id])
+  product   Products @relation(fields: [productId], references: [id])
 }
 
-model Address {
-  id             String    @id @default(cuid())
-  customerId     String? // Made optional
-  customer       Customer? @relation(fields: [customerId], references: [id])
-  email          String // Added for guest checkouts
+model Addresses {
+  id             String     @id @default(cuid())
   firstName      String
   lastName       String
   company        String?
@@ -141,89 +120,304 @@ model Address {
   postalCode     String
   country        String
   phone          String?
-  isDefault      Boolean   @default(false)
-  shippingOrders Order[]   @relation("ShippingAddress")
-  billingOrders  Order[]   @relation("BillingAddress")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  isDefault      Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  customerId     String?
+  guestEmail     String?
+  guestName      String?
+  customer       Customers? @relation(fields: [customerId], references: [id])
+  billingOrders  Orders[]   @relation("BillingAddress")
+  shippingOrders Orders[]   @relation("ShippingAddress")
+
+  @@index([customerId])
 }
 
 model Settings {
   id             String   @id @default(cuid())
-  logo           Media?   @relation("LogoImage", fields: [logoId], references: [id])
   logoId         String?  @unique
-  favicon        Media?   @relation("FaviconImage", fields: [faviconId], references: [id])
   faviconId      String?  @unique
-  theme          Theme    @relation(fields: [themeId], references: [id])
   themeId        String
   contactEmail   String?
   contactPhone   String?
   address        String?
-  socialLinks    Json? // { facebook?: string, twitter?: string, instagram?: string }
-  metaTags       Json? // SEO configuration
-  analytics      Json? // Analytics tracking IDs
+  socialLinks    Json?
+  metaTags       Json?
+  analytics      Json?
   currency       String   @default("USD")
   locale         String   @default("en")
   timezone       String   @default("UTC")
-  features       Json? // Enabled/disabled features
-  checkoutConfig Json? // Checkout configuration
-  shippingZones  Json? // Shipping configuration
-  taxConfig      Json? // Tax rules and rates
-  paymentConfig  Json? // { stripeEnabled: boolean, stripePublishableKey: string, stripeSecretKey: string, stripeWebhookSecret: string, paymentMethods: { card: boolean, applePay: boolean, googlePay: boolean } }
+  features       Json?
+  checkoutConfig Json?
+  shippingZones  Json?
+  taxConfig      Json?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  paymentConfig  Json?
+  favicon        Media?   @relation("FaviconImage", fields: [faviconId], references: [id])
+  logo           Media?   @relation("LogoImage", fields: [logoId], references: [id])
+  theme          Themes   @relation(fields: [themeId], references: [id])
 }
 
-model Theme {
+model Themes {
   id              String     @id @default(cuid())
   name            String
-  primaryColor    String // HEX or RGB value
+  primaryColor    String
   secondaryColor  String
   accentColor     String
   backgroundColor String
   textColor       String
-  buttonStyles    Json // Store button styling configuration
+  buttonStyles    Json
   fontFamily      String
-  settings        Settings[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  settings        Settings[]
 }
 
-model Page {
-  id         String     @id @default(cuid())
-  title      String
-  slug       String     @unique
-  content    Json // Structured content data
-  status     PageStatus @default(DRAFT)
-  layout     PageLayout @default(FULL_WIDTH)
-  isSystem   Boolean    @default(false) // For system pages like Home, About, etc.
-  template   Template?  @relation(fields: [templateId], references: [id])
-  templateId String?
-
-  // SEO fields
-  metaTitle       String?
-  metaDescription String?
-  ogImage         String?
-
-  // Navigation
-  showInNavigation Boolean @default(true)
+model Pages {
+  id               String         @id @default(cuid())
+  title            String
+  slug             String         @unique
+  content          Json
+  status           PageStatus     @default(DRAFT)
+  layout           PageLayout     @default(FULL_WIDTH)
+  isSystem         Boolean        @default(false)
+  templateId       String?
+  metaTitle        String?
+  metaDescription  String?
+  ogImage          String?
+  showInNavigation Boolean        @default(true)
   navigationLabel  String?
   navigationOrder  Int?
+  visibility       PageVisibility @default(PUBLIC)
+  publishedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  parentId         String?
+  parent           Pages?         @relation("PageHierarchy", fields: [parentId], references: [id])
+  children         Pages[]        @relation("PageHierarchy")
+  template         Templates?     @relation(fields: [templateId], references: [id])
+  sections         Sections[]
+  permissions      Permissions[]  @relation("PageToPermission")
+}
 
-  // Permissions
-  visibility  PageVisibility @default(PUBLIC)
-  permissions Permission[]
+model Sections {
+  id        String      @id @default(cuid())
+  type      SectionType
+  title     String?
+  content   Json
+  style     Json?
+  order     Int
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  pageId    String
+  settings  Json?
+  page      Pages       @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
-  // Timestamps
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  @@index([pageId, order])
+}
 
-  // Relations
-  sections Section[]
-  parent   Page?     @relation("PageHierarchy", fields: [parentId], references: [id])
-  parentId String?
-  children Page[]    @relation("PageHierarchy")
+model Media {
+  id         String    @id @default(cuid())
+  name       String
+  url        String
+  bucketId   String
+  type       MediaType @default(IMAGE)
+  size       Int
+  mimeType   String?
+  alt        String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  faviconFor Settings? @relation("FaviconImage")
+  logoFor    Settings? @relation("LogoImage")
+}
+
+model Navigations {
+  id        String         @id @default(cuid())
+  name      String
+  type      NavigationType
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  items     NavItems[]
+}
+
+model NavItems {
+  id           String      @id @default(cuid())
+  navigationId String
+  label        String
+  icon         String?
+  link         String?
+  order        Int
+  parentId     String?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  navigation   Navigations @relation(fields: [navigationId], references: [id])
+  parent       NavItems?   @relation("SubItems", fields: [parentId], references: [id])
+  children     NavItems[]  @relation("SubItems")
+
+  @@index([navigationId, order])
+}
+
+model Permissions {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pages     Pages[]  @relation("PageToPermission")
+}
+
+model Components {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  config    Json
+  style     Json?
+  isGlobal  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Templates {
+  id          String   @id @default(cuid())
+  name        String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  description String?
+  sections    Json
+  settings    Json?
+  thumbnail   String?
+  type        PageType
+  pages       Pages[]
+}
+
+model ShippingZones {
+  id        String          @id @default(uuid())
+  name      String
+  countries String[]
+  storeId   String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  rates     ShippingRates[]
+  store     Stores          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model ShippingRates {
+  id        String        @id @default(uuid())
+  name      String
+  price     Float
+  minWeight Float?
+  maxWeight Float?
+  minOrder  Float?
+  maxOrder  Float?
+  zoneId    String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  zone      ShippingZones @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@index([zoneId])
+}
+
+model Customers {
+  id        String             @id @default(cuid())
+  email     String             @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  status    String             @default("ACTIVE")
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  addresses Addresses[]
+  orders    Orders[]
+  downloads ProductDownloads[]
+  licenses  ProductLicenses[]
+}
+
+model DigitalProducts {
+  id            String             @id @default(cuid())
+  productId     String             @unique
+  type          DigitalType        @default(THEME)
+  fileUrl       String
+  previewUrl    String?
+  version       String
+  changelog     Json?
+  requirements  Json?
+  features      String[]
+  documentation String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  product       Products           @relation(fields: [productId], references: [id])
+  downloads     ProductDownloads[]
+  licenses      ProductLicenses[]
+  support       SupportInfos?
+}
+
+model SupportInfos {
+  id               String          @id @default(cuid())
+  digitalProductId String          @unique
+  supportEmail     String?
+  supportUrl       String?
+  supportPeriod    Int?
+  includedSupport  String[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
+}
+
+model ProductDownloads {
+  id               String          @id @default(cuid())
+  digitalProductId String
+  customerId       String?
+  orderNumber      String
+  downloadUrl      String
+  downloadCount    Int             @default(0)
+  expiresAt        DateTime
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  customer         Customers?      @relation(fields: [customerId], references: [id])
+  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
+
+  @@index([digitalProductId])
+  @@index([customerId])
+  @@index([orderNumber])
+}
+
+model ProductLicenses {
+  id               String          @id @default(cuid())
+  digitalProductId String
+  customerId       String?
+  orderNumber      String
+  licenseKey       String          @unique
+  type             LicenseType     @default(STANDARD)
+  status           LicenseStatus   @default(ACTIVE)
+  expiresAt        DateTime?
+  activationsLimit Int?
+  activationsCount Int             @default(0)
+  metadata         Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  customer         Customers?      @relation(fields: [customerId], references: [id])
+  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
+
+  @@index([digitalProductId])
+  @@index([customerId])
+  @@index([orderNumber])
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  TEAM
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
 }
 
 enum PageStatus {
@@ -236,74 +430,6 @@ enum PageVisibility {
   PUBLIC
   PRIVATE
   PASSWORD_PROTECTED
-}
-
-model Section {
-  id        String      @id @default(cuid())
-  page      Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  pageId    String
-  type      SectionType
-  title     String?
-  content   Json // Structured content based on section type
-  settings  Json? // Section-specific settings
-  style     Json? // Section-specific styling
-  order     Int
-  isActive  Boolean     @default(true)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  @@index([pageId, order])
-}
-
-model Media {
-  id         String    @id @default(cuid())
-  name       String
-  url        String // Will use Supabase storage URL
-  bucketId   String // Supabase storage bucket
-  type       MediaType @default(IMAGE)
-  size       Int
-  mimeType   String?
-  alt        String?
-  logoFor    Settings? @relation("LogoImage")
-  faviconFor Settings? @relation("FaviconImage")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-}
-
-model Navigation {
-  id        String         @id @default(cuid())
-  name      String // e.g., "Admin Sidebar", "Main Menu", "Footer Menu"
-  type      NavigationType
-  items     NavItem[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-}
-
-model NavItem {
-  id           String     @id @default(cuid())
-  navigation   Navigation @relation(fields: [navigationId], references: [id])
-  navigationId String
-  label        String
-  icon         String? // Icon identifier (e.g., "settings", "home")
-  link         String? // Internal link or external URL
-  order        Int
-  parentId     String? // For nested menu items
-  parent       NavItem?   @relation("SubItems", fields: [parentId], references: [id])
-  children     NavItem[]  @relation("SubItems")
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  @@index([navigationId, order])
-}
-
-model Permission {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  pages Page[]
 }
 
 enum OrderStatus {
@@ -390,69 +516,31 @@ enum PageType {
   CUSTOM
 }
 
-model Component {
-  id        String   @id @default(cuid())
-  name      String
-  type      String // Button, Card, Form, etc.
-  config    Json // Component configuration
-  style     Json? // Component-specific styling
-  isGlobal  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum DigitalType {
+  THEME
+  TEMPLATE
+  PLUGIN
+  ASSET_PACK
+  COMPONENT
+  APP
 }
 
-model Template {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  thumbnail   String? // Preview image
-  type        PageType
-  sections    Json // Pre-configured sections
-  settings    Json? // Template-specific settings
-  isDefault   Boolean  @default(false)
-  pages       Page[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum LicenseType {
+  STANDARD
+  EXTENDED
+  UNLIMITED
+  TRIAL
 }
 
-model ShippingZone {
-  id        String         @id @default(uuid())
-  name      String
-  countries String[]
-  rates     ShippingRate[]
-  storeId   String
-  store     Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-
-  @@index([storeId])
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  CANCELLED
 }
 
-model ShippingRate {
-  id        String       @id @default(uuid())
-  name      String
-  price     Float
-  minWeight Float?
-  maxWeight Float?
-  minOrder  Float?
-  maxOrder  Float?
-  zoneId    String
-  zone      ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  @@index([zoneId])
-}
-
-model Customer {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  firstName String?
-  lastName  String?
-  phone     String?
-  status    String    @default("ACTIVE")
-  orders    Order[]
-  addresses Address[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+  SUBSCRIPTION
 }

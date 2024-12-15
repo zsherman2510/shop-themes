@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function deleteProduct(id: string) {
   try {
     // Check if product has any orders
-    const productWithOrders = await prisma.product.findUnique({
+    const productWithOrders = await prisma.products.findUnique({
       where: { id },
       select: {
         _count: {
@@ -22,7 +22,7 @@ export async function deleteProduct(id: string) {
 
     if (productWithOrders._count.orderItems > 0) {
       // If product has orders, just update its status to inactive
-      await prisma.product.update({
+      await prisma.products.update({
         where: { id },
         data: {
           isActive: false,
@@ -30,7 +30,7 @@ export async function deleteProduct(id: string) {
       });
     } else {
       // If product has no orders, we can safely delete it
-      await prisma.product.delete({
+      await prisma.products.delete({
         where: { id },
       });
     }

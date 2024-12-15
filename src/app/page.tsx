@@ -1,39 +1,21 @@
-import Navbar from "@/components/layout/navbar";
-import Hero from "@/components/home/hero";
-import Categories from "@/components/home/categories";
-import FeaturedProducts from "@/components/home/featured-products";
-import Newsletter from "@/components/home/newsletter";
+import Hero from "@/components/store/home/hero";
+import Categories from "@/components/store/home/categories";
+import FeaturedProducts from "@/components/store/home/featured-products";
+import Newsletter from "@/components/store/home/newsletter";
+import { getCategories } from "@/app/_actions/store/categories";
+import { getFeaturedProducts } from "@/app/_actions/store/products";
 
-// Temporary data (replace with actual data from your database)
-const categories = [
-  { name: "Women", slug: "women", image: "/category-women.jpg" },
-  { name: "Men", slug: "men", image: "/category-men.jpg" },
-  {
-    name: "Accessories",
-    slug: "accessories",
-    image: "/category-accessories.jpg",
-  },
-];
+export default async function HomePage() {
+  const [categories, featuredProducts] = await Promise.all([
+    getCategories(),
+    getFeaturedProducts(),
+  ]);
 
-const products = [
-  {
-    id: 1,
-    name: "Classic White T-Shirt",
-    price: "29.99",
-    image: "/product-1.jpg",
-  },
-  { id: 2, name: "Denim Jacket", price: "89.99", image: "/product-2.jpg" },
-  { id: 3, name: "Leather Sneakers", price: "129.99", image: "/product-3.jpg" },
-  { id: 4, name: "Cotton Sweater", price: "59.99", image: "/product-4.jpg" },
-];
-
-export default function Home() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="flex min-h-screen flex-col">
       <Hero />
       <Categories categories={categories} />
-      <FeaturedProducts products={products} />
+      <FeaturedProducts products={featuredProducts} />
       <Newsletter />
     </div>
   );

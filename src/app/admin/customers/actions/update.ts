@@ -15,7 +15,7 @@ export async function updateCustomer(
 ) {
   try {
     if (data.email) {
-      const existingCustomer = await prisma.customer.findFirst({
+      const existingCustomer = await prisma.customers.findFirst({
         where: {
           email: data.email,
           NOT: { id },
@@ -27,7 +27,7 @@ export async function updateCustomer(
       }
     }
 
-    const customer = await prisma.customer.update({
+    const customer = await prisma.customers.update({
       where: { id },
       data,
       select: {
