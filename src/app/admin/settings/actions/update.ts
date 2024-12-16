@@ -62,7 +62,7 @@ export async function getSettings() {
           theme: true,
         },
       }),
-      prisma.store.findFirst(),
+      prisma.stores.findFirst(),
     ]);
 
     if (!settings) {
@@ -87,7 +87,7 @@ export async function getSettings() {
 
 export async function updateTheme(themeId: string, data: any) {
   try {
-    const theme = await prisma.theme.update({
+    const theme = await prisma.themes.update({
       where: { id: themeId },
       data: {
         name: data.name,
@@ -119,7 +119,7 @@ export async function updateShipping(data: { id: string; shippingZones: any }) {
           theme: true,
         },
       }),
-      prisma.store.findFirst(),
+      prisma.stores.findFirst(),
     ]);
 
     if (!store) {
@@ -150,7 +150,7 @@ export async function updatePayment(data: { id: string; paymentConfig: PaymentCo
           theme: true,
         },
       }),
-      prisma.store.findFirst(),
+      prisma.stores.findFirst(),
     ]);
 
     if (!store) {
