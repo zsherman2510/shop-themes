@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
+import ButtonSignin from "../buttons/ButtonSignin";
 
 interface NavbarProps {
   isAdminUser?: boolean;
@@ -30,6 +31,14 @@ const Navbar = ({ isAdminUser }: NavbarProps) => {
             tabIndex={0}
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
+            <li>
+              <Link
+                href="/store/products"
+                className="text-base-content/70 hover:text-base-content"
+              >
+                Products
+              </Link>
+            </li>
             <li>
               <Link
                 href="/store/categories"
@@ -67,6 +76,14 @@ const Navbar = ({ isAdminUser }: NavbarProps) => {
         <ul className="menu menu-horizontal px-1">
           <li>
             <Link
+              href="/store/products"
+              className="text-base-content/70 hover:text-base-content"
+            >
+              Products
+            </Link>
+          </li>
+          <li>
+            <Link
               href="/store/categories"
               className="text-base-content/70 hover:text-base-content"
             >
@@ -93,17 +110,13 @@ const Navbar = ({ isAdminUser }: NavbarProps) => {
       </div>
       <div className="navbar-end">
         <ThemeToggle />
-        <Link
-          href="/login"
-          className="btn btn-ghost text-base-content/70 hover:text-base-content"
-        >
-          Account
-        </Link>
+
         {isAdminUser && (
           <Link href="/admin/dashboard" className="btn btn-primary">
             Admin
           </Link>
         )}
+        <ButtonSignin />
       </div>
     </div>
   );

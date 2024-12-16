@@ -14,7 +14,7 @@ export async function updateOrder(
   }
 ) {
   try {
-    const order = await prisma.order.update({
+    const order = await prisma.orders.update({
       where: { id },
       data,
       select: {

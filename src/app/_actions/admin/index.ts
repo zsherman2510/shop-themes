@@ -1,17 +1,15 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { authOptions } from "@/components/auth/next-auth";
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 
 export const isAdminOrTeam = async () => {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) return false;
+  const session = await getServerSession(authOptions);
   
   const dbUser = await prisma.users.findUnique({
     where: {
-      id: user.id
+      id: session?.user.id
     },
     select: {
       role: true

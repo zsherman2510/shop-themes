@@ -16,7 +16,7 @@ export async function revalidateDashboard() {
 export const getDashboardStats = unstable_cache(
   async () => {
     try {
-      const totalSales = await prisma.order.aggregate({
+      const totalSales = await prisma.orders.aggregate({
         _sum: {
           total: true,
         },
@@ -25,9 +25,9 @@ export const getDashboardStats = unstable_cache(
         },
       });
 
-      const totalOrders = await prisma.order.count();
+      const totalOrders = await prisma.orders.count();
 
-      const totalProducts = await prisma.product.count({
+      const totalProducts = await prisma.products.count({
         where: {
           isActive: true,
         },
@@ -43,7 +43,7 @@ export const getDashboardStats = unstable_cache(
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const previousSales = await prisma.order.aggregate({
+      const previousSales = await prisma.orders.aggregate({
         _sum: {
           total: true,
         },
@@ -55,7 +55,7 @@ export const getDashboardStats = unstable_cache(
         },
       });
 
-      const previousOrders = await prisma.order.count({
+      const previousOrders = await prisma.orders.count({
         where: {
           createdAt: {
             lt: thirtyDaysAgo,
@@ -112,7 +112,7 @@ export const getDashboardStats = unstable_cache(
 export const getRecentOrders = unstable_cache(
   async () => {
     try {
-      const orders = await prisma.order.findMany({
+      const orders = await prisma.orders.findMany({
         take: 5,
         orderBy: {
           createdAt: "desc",

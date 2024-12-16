@@ -14,7 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-
+import ButtonSignin from "@/components/buttons/ButtonSignin";
 const AdminNav = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -101,37 +101,46 @@ const AdminNav = () => {
           </button>
         )}
       </div>
-      <div className="p-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
+      <div className="flex flex-col h-[calc(100vh-64px)]">
+        <div className="p-4 flex-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 group ${
-                isActive
-                  ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-              }`}
-            >
-              <Icon
-                size={20}
-                className={
-                  isActive ? "shrink-0" : "shrink-0 group-hover:scale-110"
-                }
-              />
-              <span
-                className={`whitespace-nowrap transition-all duration-300 ${
-                  isCollapsed ? "opacity-0 w-0" : "opacity-100"
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 group ${
+                  isActive
+                    ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                 }`}
               >
-                {item.title}
-              </span>
-            </Link>
-          );
-        })}
+                <Icon
+                  size={20}
+                  className={
+                    isActive ? "shrink-0" : "shrink-0 group-hover:scale-110"
+                  }
+                />
+                <span
+                  className={`whitespace-nowrap transition-all duration-300 ${
+                    isCollapsed ? "opacity-0 w-0" : "opacity-100"
+                  }`}
+                >
+                  {item.title}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Add ButtonSignin at bottom */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+          <ButtonSignin
+            extraStyle={`w-full justify-start ${isCollapsed ? "px-2" : "px-4"}`}
+          />
+        </div>
       </div>
     </>
   );
@@ -185,7 +194,7 @@ const AdminNav = () => {
   }
   return (
     <nav
-      className={`sticky top-0 h-screen transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 ${
+      className={`h-screen overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >

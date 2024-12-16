@@ -12,7 +12,7 @@ export async function createPage(data: {
   isSystem?: boolean;
 }) {
   try {
-    const existingPage = await prisma.page.findUnique({
+    const existingPage = await prisma.pages.findUnique({
       where: { slug: data.slug },
     });
 
@@ -20,7 +20,7 @@ export async function createPage(data: {
       throw new Error("Page with this slug already exists");
     }
 
-    const page = await prisma.page.create({
+    const page = await prisma.pages.create({
       data: {
         title: data.title,
         slug: data.slug,

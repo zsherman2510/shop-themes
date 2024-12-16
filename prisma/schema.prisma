@@ -7,11 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
+model User {
   id            String     @id @default(uuid())
   email         String     @unique
+  name          String?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  image         String?
   emailVerified DateTime?
   firstName     String?
   lastLogin     DateTime?
@@ -20,8 +22,40 @@ model Users {
   permissions   String[]
   status        UserStatus @default(ACTIVE)
   storeId       String?
-  role          UserRole   @default(TEAM)
+  role          UserRole   @default(CUSTOMER)
   isActive      Boolean    @default(true)
+  Account       Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId, provider])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionToken])
+  @@index([userId])
 }
 
 model Stores {

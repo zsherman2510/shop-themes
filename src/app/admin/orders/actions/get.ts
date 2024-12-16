@@ -32,7 +32,7 @@ export async function getOrders({
   try {
     const skip = (page - 1) * limit;
 
-    const where: Prisma.OrderWhereInput = {
+    const where: Prisma.OrdersWhereInput = {
       ...(search && {
         OR: [
           { orderNumber: { contains: search, mode: "insensitive" } },
@@ -51,7 +51,7 @@ export async function getOrders({
     };
 
     const [orders, count] = await Promise.all([
-      prisma.order.findMany({
+      prisma.orders.findMany({
         where,
         select: {
           id: true,
@@ -73,7 +73,7 @@ export async function getOrders({
         take: limit,
         skip,
       }),
-      prisma.order.count({ where }),
+      prisma.orders.count({ where }),
     ]);
 
     const formattedOrders: OrderResponse[] = orders.map((order) => ({
@@ -94,7 +94,7 @@ export async function getOrders({
 
 export async function getOrder(id: string) {
   try {
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id },
       select: {
         id: true,

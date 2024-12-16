@@ -18,7 +18,7 @@ export async function getPages({
   try {
     const skip = (page - 1) * limit;
 
-    const where: Prisma.PageWhereInput = {
+    const where: Prisma.PagesWhereInput = {
       isSystem: true,
       ...(search && {
         title: { contains: search, mode: "insensitive" as Prisma.QueryMode },
@@ -27,7 +27,7 @@ export async function getPages({
     };
 
     const [pages, count] = await Promise.all([
-      prisma.page.findMany({
+      prisma.pages.findMany({
         where,
         orderBy: { updatedAt: "desc" },
         take: limit,
@@ -40,7 +40,7 @@ export async function getPages({
           updatedAt: true,
         },
       }),
-      prisma.page.count({ where }),
+      prisma.pages.count({ where }),
     ]);
 
     return {
@@ -56,7 +56,7 @@ export async function getPages({
 
 export async function getPage(id: string): Promise<PageDetails> {
   try {
-    const page = await prisma.page.findUnique({
+    const page = await prisma.pages.findUnique({
       where: { id },
       select: {
         id: true,
@@ -95,7 +95,7 @@ export async function getPage(id: string): Promise<PageDetails> {
 export async function initializeHomePage() {
   try {
     // Check if home page exists
-    const homePage = await prisma.page.findFirst({
+    const homePage = await prisma.pages.findFirst({
       where: {
         slug: "home",
         isSystem: true,
@@ -104,7 +104,7 @@ export async function initializeHomePage() {
 
     // If home page doesn't exist, create it
     if (!homePage) {
-      await prisma.page.create({
+      await prisma.pages.create({
         data: {
           title: "Home",
           slug: "home",
