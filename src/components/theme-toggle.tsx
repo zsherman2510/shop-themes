@@ -1,21 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState("modern");
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "modern";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-    setTheme(savedTheme);
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
-    const newTheme = theme === "modern" ? "dark" : "modern";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-    setTheme(newTheme);
+    setTheme(theme === "modern" ? "dark" : "modern");
   };
 
   return (

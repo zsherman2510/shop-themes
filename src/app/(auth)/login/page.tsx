@@ -2,8 +2,9 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
-import { Github, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function CustomerLoginPage() {
   const router = useRouter();
@@ -12,15 +13,6 @@ export default function CustomerLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClientComponentClient();
-
-  const signInWithGithub = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    });
-  };
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -43,7 +35,7 @@ export default function CustomerLoginPage() {
       });
 
       if (error) throw error;
-      router.push("/"); // Redirect to customer account page
+      router.push("/");
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -52,28 +44,24 @@ export default function CustomerLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-white dark:bg-gray-950">
-      <div className="w-full max-w-md space-y-8 px-4">
+    <div className="card w-full bg-base-100 shadow-xl">
+      <div className="card-body">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Welcome back
+          <h2 className="text-3xl font-bold text-base-content">
+            Create an Account
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Sign in to your account to view orders and more
+          <p className="mt-2 text-sm text-base-content/70">
+            Join us to start shopping and tracking your orders
           </p>
         </div>
 
         <div className="space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-900/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert alert-error">{error}</div>}
 
           {/* OAuth Providers */}
           <button
             onClick={signInWithGoogle}
-            className="relative flex w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="btn btn-outline w-full gap-2"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -96,99 +84,59 @@ export default function CustomerLoginPage() {
             Continue with Google
           </button>
 
-          <button
-            onClick={signInWithGithub}
-            className="relative flex w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <Github className="h-5 w-5" />
-            Continue with GitHub
-          </button>
+          <div className="divider">Or continue with email</div>
 
-          {/* Email/Password Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-800" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500 dark:bg-black dark:text-gray-400">
-                Or continue with email
-              </span>
-            </div>
-          </div>
-
-          {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Email
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Email</span>
               </label>
               <input
-                id="email"
-                name="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-                className="mt-1 block w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-white dark:focus:ring-white"
                 placeholder="name@example.com"
+                className="input input-bordered"
+                required
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Password
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Password</span>
               </label>
               <input
-                id="password"
-                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                className="mt-1 block w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-white dark:focus:ring-white"
                 placeholder="••••••••"
+                className="input input-bordered"
+                required
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="relative flex w-full items-center justify-center gap-3 rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-gray-100 disabled:opacity-50"
+              className="btn btn-primary w-full"
             >
               {loading ? (
-                "Signing in..."
+                <span className="loading loading-spinner"></span>
               ) : (
                 <>
                   <Mail className="h-5 w-5" />
-                  Sign in with Email
+                  Sign up with Email
                 </>
               )}
             </button>
           </form>
 
-          <div className="text-center text-sm space-y-2">
-            <a
-              href="#"
-              className="block font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
-            >
-              Forgot your password?
-            </a>
-            <p className="text-gray-600 dark:text-gray-400">
-              Don&apos;t have an account?{" "}
-              <a
-                href="/register"
-                className="font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
-              >
-                Sign up
-              </a>
+          <div className="text-center space-y-2">
+            <p className="text-base-content/70">
+              Already have an account?{" "}
+              <Link href="/login" className="link link-primary">
+                Sign in
+              </Link>
             </p>
           </div>
         </div>

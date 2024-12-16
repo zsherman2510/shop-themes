@@ -19,7 +19,6 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      // 1. Sign in with Supabase Auth
       const {
         data: { user },
         error: authError,
@@ -31,25 +30,13 @@ export default function AdminLoginPage() {
       if (authError) throw authError;
       if (!user) throw new Error("No user found");
 
-      console.log("Auth successful:", user);
-
-      // 2. Get the user's profile from our database
       const { data: profile, error: profileError } = await supabase
         .from("User")
-        .select("*") // Select all fields for debugging
+        .select("*")
         .eq("id", user.id)
         .single();
 
-      console.log("Profile query result:", { profile, profileError });
-
       if (profileError) {
-        console.error("Profile error details:", {
-          code: profileError.code,
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint,
-        });
-
         if (profileError.code === "42501") {
           throw new Error(
             "Permission denied. Please check database permissions."
@@ -59,11 +46,8 @@ export default function AdminLoginPage() {
       }
 
       if (!profile) {
-        console.error("No profile found for user:", user.id);
         throw new Error("User profile not found in database");
       }
-
-      console.log("Profile found:", profile);
 
       if (profile.role !== "ADMIN") {
         throw new Error("Access denied. Admin privileges required.");
@@ -83,80 +67,66 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-950">
-      <div className="w-full max-w-md space-y-8 px-4">
+    <div className="min-h-screen hero bg-base-200">
+      <div className="hero-content flex-col w-full max-w-md">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-base-content">
             Store Admin Login
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-base-content/70">
             Sign in to your store dashboard
           </p>
         </div>
 
-        <div className="space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-900/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
+        <div className="card w-full bg-base-100 shadow-xl">
+          <div className="card-body">
+            {error && <div className="alert alert-error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Email</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="input input-bordered"
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Password</span>
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="input input-bordered"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary w-full"
               >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-                className="mt-1 block w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-white dark:focus:ring-white"
-                placeholder="name@example.com"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                className="mt-1 block w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-white dark:focus:ring-white"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="relative flex w-full items-center justify-center gap-3 rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-gray-100 disabled:opacity-50"
-            >
-              {loading ? (
-                "Signing in..."
-              ) : (
-                <>
-                  <Mail className="h-5 w-5" />
-                  Sign in to Dashboard
-                </>
-              )}
-            </button>
-          </form>
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    Sign in to Dashboard
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

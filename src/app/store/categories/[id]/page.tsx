@@ -19,13 +19,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const products = await getProductsByCategory(category.id);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto px-4 py-8 bg-base-100">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">{category.name}</h1>
+        <h1 className="text-3xl font-bold text-base-content">
+          {category.name}
+        </h1>
         {category.description && (
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            {category.description}
-          </p>
+          <p className="mt-2 text-base-content/70">{category.description}</p>
         )}
       </div>
 
