@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import ButtonSignin from "../buttons/ButtonSignin";
+import CartIcon from "@/components/store/cart/cart-icon";
 
 interface NavbarProps {
   isAdminUser?: boolean;
@@ -8,7 +9,7 @@ interface NavbarProps {
 
 const Navbar = ({ isAdminUser }: NavbarProps) => {
   return (
-    <div className="navbar bg-base-100/80 backdrop-blur-md fixed top-0 z-50 border-b border-base-200 text-base-content">
+    <div className="navbar bg-base-100 sticky top-0 z-50">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -90,26 +91,11 @@ const Navbar = ({ isAdminUser }: NavbarProps) => {
               Categories
             </Link>
           </li>
-          <li>
-            <Link
-              href="/store/new-arrivals"
-              className="text-base-content/70 hover:text-base-content"
-            >
-              New Arrivals
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/store/sale"
-              className="text-base-content/70 hover:text-base-content"
-            >
-              Sale
-            </Link>
-          </li>
         </ul>
       </div>
       <div className="navbar-end">
         <ThemeToggle />
+        <CartIcon />
 
         {isAdminUser && (
           <Link href="/admin/dashboard" className="btn btn-primary">

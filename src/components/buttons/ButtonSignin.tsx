@@ -32,7 +32,7 @@ const ButtonSignin = ({
           ) : (
             <User className="w-6 h-6" />
           )}
-          <span className="hidden md:inline">
+          <span className="hidden md:inline text-base-content">
             {session.user?.name?.split(" ")[0] || "Account"}
           </span>
         </div>

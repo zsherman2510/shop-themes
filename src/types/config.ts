@@ -21,8 +21,7 @@ export type Theme =
   | "luxury"
   | "dracula"
   | "winter"
-  | "modern";
-
+  | "autumn";
 export interface ConfigProps {
   appName: string;
   appDescription: string;

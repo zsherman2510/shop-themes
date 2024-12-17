@@ -6,15 +6,15 @@ export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
-    setTheme(theme === "modern" ? "dark" : "modern");
+    setTheme(theme === "autumn" ? "forest" : "autumn");
   };
 
   return (
-    <label className="swap swap-rotate btn btn-ghost btn-circle">
+    <label className="swap swap-rotate btn btn-ghost btn-circle text-base-content">
       {/* sun icon */}
       <input
         type="checkbox"
-        checked={theme === "dark"}
+        checked={theme === "autumn"}
         onChange={toggleTheme}
       />
       <svg
