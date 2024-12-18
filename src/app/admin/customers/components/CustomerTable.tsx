@@ -36,7 +36,7 @@ export default function CustomersTable({
       setError(null);
       await createCustomer(formData);
       const updatedData = await fetch(
-        `/api/customers?${new URLSearchParams(searchParams)}`
+        `/admin/customers?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
       setIsModalOpen(false);
@@ -55,7 +55,7 @@ export default function CustomersTable({
       setError(null);
       await updateCustomer(selectedCustomer.id, formData);
       const updatedData = await fetch(
-        `/api/customers?${new URLSearchParams(searchParams)}`
+        `/admin/customers?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
       setIsModalOpen(false);
@@ -73,7 +73,7 @@ export default function CustomersTable({
       setError(null);
       await deleteCustomer(id);
       const updatedData = await fetch(
-        `/api/customers?${new URLSearchParams(searchParams)}`
+        `/admin/customers?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
     } catch (error: any) {

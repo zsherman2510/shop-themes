@@ -12,6 +12,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   FileText,
+  List,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ButtonSignin from "@/components/buttons/ButtonSignin";
@@ -55,6 +56,11 @@ const AdminNav = () => {
       title: "Orders",
       href: "/admin/orders",
       icon: ShoppingCart,
+    },
+    {
+      title: "Categories",
+      href: "/admin/categories",
+      icon: List,
     },
     {
       title: "Customers",

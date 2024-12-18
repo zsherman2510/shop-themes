@@ -47,7 +47,7 @@ export default function ProductsTable({
       }
 
       const updatedData = await fetch(
-        `/api/products?${new URLSearchParams(searchParams)}`
+        `/admin/products?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
       setIsModalOpen(false);
@@ -64,7 +64,7 @@ export default function ProductsTable({
       setError(null);
       await updateProduct(selectedProduct.id, formData);
       const updatedData = await fetch(
-        `/api/products?${new URLSearchParams(searchParams)}`
+        `/admin/products?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
       setIsModalOpen(false);
@@ -82,7 +82,7 @@ export default function ProductsTable({
       setError(null);
       await deleteProduct(id);
       const updatedData = await fetch(
-        `/api/products?${new URLSearchParams(searchParams)}`
+        `/admin/products?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
     } catch (error: any) {

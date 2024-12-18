@@ -73,7 +73,7 @@ export default function OrdersTable({
       setError(null);
       await updateOrder(selectedOrder.id, formData);
       const updatedData = await fetch(
-        `/api/orders?${new URLSearchParams(searchParams)}`
+        `/admin/orders?${new URLSearchParams(searchParams)}`
       ).then((res) => res.json());
       setData(updatedData);
       setIsModalOpen(false);
