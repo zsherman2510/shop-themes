@@ -30,10 +30,10 @@ export default async function PagesPage({ searchParams }: PageProps) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pages</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Manage your store pages
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">
+          Pages
+        </h1>
+        <p className="text-sm text-base-content/70">Manage your store pages</p>
       </div>
 
       <PageTable

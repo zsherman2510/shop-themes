@@ -30,81 +30,67 @@ export default function CustomerForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
-          Email
+      <div className="form-control w-full">
+        <label className="label">
+          <span className="label-text">Email</span>
         </label>
         <input
           type="email"
-          id="email"
           {...register("email", { required: "Email is required" })}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+          className={`input input-bordered w-full ${
+            errors.email ? "input-error" : ""
+          }`}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {errors.email.message}
+            </span>
+          </label>
         )}
       </div>
 
-      <div>
-        <label
-          htmlFor="firstName"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
-          First Name
+      <div className="form-control w-full">
+        <label className="label">
+          <span className="label-text">First Name</span>
         </label>
         <input
           type="text"
-          id="firstName"
           {...register("firstName")}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+          className="input input-bordered w-full"
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="lastName"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
-          Last Name
+      <div className="form-control w-full">
+        <label className="label">
+          <span className="label-text">Last Name</span>
         </label>
         <input
           type="text"
-          id="lastName"
           {...register("lastName")}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+          className="input input-bordered w-full"
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="phone"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
-          Phone
+      <div className="form-control w-full">
+        <label className="label">
+          <span className="label-text">Phone</span>
         </label>
         <input
           type="tel"
-          id="phone"
           {...register("phone")}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+          className="input input-bordered w-full"
         />
       </div>
 
       {defaultValues && (
-        <div>
-          <label
-            htmlFor="status"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-          >
-            Status
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text">Status</span>
           </label>
           <select
-            id="status"
             {...register("status")}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:outline-none focus:ring-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+            className="select select-bordered w-full"
           >
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
@@ -113,11 +99,7 @@ export default function CustomerForm({
       )}
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
-        >
+        <button type="submit" disabled={isLoading} className="btn btn-primary">
           {isLoading
             ? "Loading..."
             : defaultValues

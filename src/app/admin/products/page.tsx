@@ -1,5 +1,5 @@
 import { getProducts } from "./actions/get";
-import ProductsTable from "./components/ProductTable";
+import ProductsTable from "./components/ProductsTable";
 
 // Type for search params
 type SearchParams = { [key: string]: string | string[] | undefined };
@@ -30,8 +30,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">
+          Products
+        </h1>
+        <p className="text-sm text-base-content/70">
           Manage your products and inventory
         </p>
       </div>

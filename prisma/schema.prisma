@@ -71,22 +71,29 @@ model Stores {
 }
 
 model Products {
-  id             String           @id @default(cuid())
-  name           String
-  description    String?
-  price          Decimal          @db.Decimal(10, 2)
-  images         String[]
-  categoryId     String?
-  inventory      Int              @default(0)
-  isActive       Boolean          @default(true)
-  metadata       Json?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  sku            String           @unique
-  type           ProductType      @default(PHYSICAL)
-  digitalProduct DigitalProducts?
-  orderItems     OrderItems[]
-  category       Categories?      @relation(fields: [categoryId], references: [id])
+  id            String             @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal            @db.Decimal(10, 2)
+  images        String[]
+  categoryId    String?
+  inventory     Int                @default(0)
+  isActive      Boolean            @default(true)
+  metadata      Json?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  sku           String             @unique
+  type          ProductType        @default(PHYSICAL)
+  fileUrl       String?
+  previewUrl    String?
+  version       String?
+  requirements  Json?
+  features      String[]           @default([])
+  documentation String?
+  orderItems    OrderItems[]
+  category      Categories?        @relation(fields: [categoryId], references: [id])
+  downloads     ProductDownloads[]
+  licenses      ProductLicenses[]
 
   @@index([categoryId])
   @@index([sku])
@@ -371,73 +378,42 @@ model Customers {
   licenses  ProductLicenses[]
 }
 
-model DigitalProducts {
-  id            String             @id @default(cuid())
-  productId     String             @unique
-  type          DigitalType        @default(THEME)
-  fileUrl       String
-  previewUrl    String?
-  version       String
-  changelog     Json?
-  requirements  Json?
-  features      String[]
-  documentation String?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  product       Products           @relation(fields: [productId], references: [id])
-  downloads     ProductDownloads[]
-  licenses      ProductLicenses[]
-  support       SupportInfos?
-}
-
-model SupportInfos {
-  id               String          @id @default(cuid())
-  digitalProductId String          @unique
-  supportEmail     String?
-  supportUrl       String?
-  supportPeriod    Int?
-  includedSupport  String[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
-}
-
 model ProductDownloads {
-  id               String          @id @default(cuid())
-  digitalProductId String
-  customerId       String?
-  orderNumber      String
-  downloadUrl      String
-  downloadCount    Int             @default(0)
-  expiresAt        DateTime
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  customer         Customers?      @relation(fields: [customerId], references: [id])
-  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
+  id            String     @id @default(cuid())
+  productId     String     @unique
+  customerId    String?
+  orderNumber   String
+  downloadUrl   String
+  downloadCount Int        @default(0)
+  expiresAt     DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  customer      Customers? @relation(fields: [customerId], references: [id])
+  product       Products   @relation(fields: [productId], references: [id])
 
-  @@index([digitalProductId])
+  @@index([productId])
   @@index([customerId])
   @@index([orderNumber])
 }
 
 model ProductLicenses {
-  id               String          @id @default(cuid())
-  digitalProductId String
+  id               String        @id @default(cuid())
+  productId        String        @unique
   customerId       String?
   orderNumber      String
-  licenseKey       String          @unique
-  type             LicenseType     @default(STANDARD)
-  status           LicenseStatus   @default(ACTIVE)
+  licenseKey       String        @unique
+  type             LicenseType   @default(STANDARD)
+  status           LicenseStatus @default(ACTIVE)
   expiresAt        DateTime?
   activationsLimit Int?
-  activationsCount Int             @default(0)
+  activationsCount Int           @default(0)
   metadata         Json?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  customer         Customers?      @relation(fields: [customerId], references: [id])
-  digitalProduct   DigitalProducts @relation(fields: [digitalProductId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  customer         Customers?    @relation(fields: [customerId], references: [id])
+  product          Products      @relation(fields: [productId], references: [id])
 
-  @@index([digitalProductId])
+  @@index([productId])
   @@index([customerId])
   @@index([orderNumber])
 }

@@ -19,7 +19,7 @@ export async function updateProduct(
 ) {
   try {
     if (data.sku) {
-      const existingProduct = await prisma.product.findFirst({
+      const existingProduct = await prisma.products.findFirst({
         where: {
           sku: data.sku,
           NOT: { id },
@@ -31,7 +31,7 @@ export async function updateProduct(
       }
     }
 
-    const product = await prisma.product.update({
+    const product = await prisma.products.update({
       where: { id },
       data,
       select: {

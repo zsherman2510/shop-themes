@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductType } from "@prisma/client";
 
 export type ProductResponse = {
   id: string;
@@ -18,6 +18,15 @@ export type ProductResponse = {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  type: ProductType;
+  // Digital product fields
+  fileUrl: string | null;
+  previewUrl: string | null;
+  version: string | null;
+  features: string[];
+  documentation: string | null;
+  changelog: any | null;
+  requirements: any | null;
 };
 
 export async function getProducts({
@@ -65,6 +74,14 @@ export async function getProducts({
           isActive: true,
           createdAt: true,
           updatedAt: true,
+          type: true,
+          fileUrl: true,
+          previewUrl: true,
+          version: true,
+          features: true,
+          documentation: true,
+          changelog: true,
+          requirements: true,
         },
         orderBy: { createdAt: "desc" },
         take: limit,
@@ -111,6 +128,14 @@ export async function getProduct(id: string) {
         metadata: true,
         createdAt: true,
         updatedAt: true,
+        type: true,
+        fileUrl: true,
+        previewUrl: true,
+        version: true,
+        features: true,
+        documentation: true,
+        changelog: true,
+        requirements: true,
       },
     });
 

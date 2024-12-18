@@ -44,11 +44,6 @@ export default function PageForm({ defaultValues, isLoading }: PageFormProps) {
     },
   });
 
-  const inputClassName = (hasError: boolean) =>
-    `w-full rounded-lg border ${
-      hasError ? "border-red-500" : "border-gray-200"
-    } px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100`;
-
   const onSubmit = async (data: any) => {
     try {
       if (!defaultValues?.id) return;
@@ -65,14 +60,10 @@ export default function PageForm({ defaultValues, isLoading }: PageFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">
+        <h2 className="text-lg font-medium text-base-content">
           {defaultValues ? "Edit Page" : "Create Page"}
         </h2>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
-        >
+        <button type="submit" disabled={isLoading} className="btn btn-primary">
           {isLoading
             ? "Saving..."
             : defaultValues
@@ -83,122 +74,144 @@ export default function PageForm({ defaultValues, isLoading }: PageFormProps) {
 
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-800">
-          <h3 className="mb-4 text-base font-medium">Hero Section</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium">Title</label>
-              <input
-                type="text"
-                {...register("content.hero.title", {
-                  required: "Title is required",
-                  minLength: {
-                    value: 3,
-                    message: "Title must be at least 3 characters",
-                  },
-                })}
-                className={inputClassName(!!errors.content?.hero?.title)}
-              />
-              {errors.content?.hero?.title && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.content.hero.title.message as string}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Description
-              </label>
-              <textarea
-                {...register("content.hero.description")}
-                rows={3}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium">CTA Text</label>
-              <input
-                type="text"
-                {...register("content.hero.cta")}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Image URL
-              </label>
-              <input
-                type="text"
-                {...register("content.hero.image")}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-              />
+        <div className="card bg-base-100">
+          <div className="card-body">
+            <h3 className="card-title text-base">Hero Section</h3>
+            <div className="space-y-4">
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Title</span>
+                </label>
+                <input
+                  type="text"
+                  {...register("content.hero.title", {
+                    required: "Title is required",
+                    minLength: {
+                      value: 3,
+                      message: "Title must be at least 3 characters",
+                    },
+                  })}
+                  className={`input input-bordered w-full ${
+                    errors.content?.hero?.title ? "input-error" : ""
+                  }`}
+                />
+                {errors.content?.hero?.title && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.content.hero.title.message as string}
+                    </span>
+                  </label>
+                )}
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Description</span>
+                </label>
+                <textarea
+                  {...register("content.hero.description")}
+                  rows={3}
+                  className="textarea textarea-bordered w-full"
+                />
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">CTA Text</span>
+                </label>
+                <input
+                  type="text"
+                  {...register("content.hero.cta")}
+                  className="input input-bordered w-full"
+                />
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Image URL</span>
+                </label>
+                <input
+                  type="text"
+                  {...register("content.hero.image")}
+                  className="input input-bordered w-full"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Featured Products Section */}
-        <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-800">
-          <h3 className="mb-4 text-base font-medium">
-            Featured Products Section
-          </h3>
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Section Title
-            </label>
-            <input
-              type="text"
-              {...register("content.featuredProducts.title")}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-            />
+        <div className="card bg-base-100">
+          <div className="card-body">
+            <h3 className="card-title text-base">Featured Products Section</h3>
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text">Section Title</span>
+              </label>
+              <input
+                type="text"
+                {...register("content.featuredProducts.title")}
+                className="input input-bordered w-full"
+              />
+            </div>
           </div>
         </div>
 
         {/* Categories Section */}
-        <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-800">
-          <h3 className="mb-4 text-base font-medium">Categories Section</h3>
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Section Title
-            </label>
-            <input
-              type="text"
-              {...register("content.categories.title")}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-            />
+        <div className="card bg-base-100">
+          <div className="card-body">
+            <h3 className="card-title text-base">Categories Section</h3>
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text">Section Title</span>
+              </label>
+              <input
+                type="text"
+                {...register("content.categories.title")}
+                className="input input-bordered w-full"
+              />
+            </div>
           </div>
         </div>
 
         {/* Newsletter Section */}
-        <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-800">
-          <h3 className="mb-4 text-base font-medium">Newsletter Section</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium">Title</label>
-              <input
-                type="text"
-                {...register("content.newsletter.title")}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Description
-              </label>
-              <textarea
-                {...register("content.newsletter.description")}
-                rows={3}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
-              />
+        <div className="card bg-base-100">
+          <div className="card-body">
+            <h3 className="card-title text-base">Newsletter Section</h3>
+            <div className="space-y-4">
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Title</span>
+                </label>
+                <input
+                  type="text"
+                  {...register("content.newsletter.title")}
+                  className="input input-bordered w-full"
+                />
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Description</span>
+                </label>
+                <textarea
+                  {...register("content.newsletter.description")}
+                  rows={3}
+                  className="textarea textarea-bordered w-full"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Page Status */}
-        <div>
-          <label className="mb-2 block text-sm font-medium">Status</label>
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text">Status</span>
+          </label>
           <select
             {...register("status")}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
+            className="select select-bordered w-full"
           >
             <option value={PageStatus.DRAFT}>Draft</option>
             <option value={PageStatus.PUBLISHED}>Published</option>

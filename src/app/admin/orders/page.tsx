@@ -30,8 +30,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">
+          Orders
+        </h1>
+        <p className="text-sm text-base-content/70">
           Manage your orders and their status
         </p>
       </div>

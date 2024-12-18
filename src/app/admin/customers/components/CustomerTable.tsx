@@ -95,97 +95,74 @@ export default function CustomersTable({
             setSelectedCustomer(undefined);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+          className="btn btn-primary btn-sm gap-2"
         >
           <Plus className="h-4 w-4" />
           Add Customer
         </button>
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-900/50 dark:text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <div className="alert alert-error mb-4">{error}</div>}
 
-      <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+      <div className="card bg-base-100 shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <table className="table">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Customer Details
-                </th>
+              <tr>
+                <th className="text-base-content/70">Customer Details</th>
+                <th className="text-base-content/70">Email</th>
+                <th className="text-base-content/70">Phone</th>
+                <th className="text-base-content/70">Orders</th>
+                <th className="text-base-content/70">Total Spent</th>
+                <th className="text-base-content/70">Status</th>
+                <th className="text-base-content/70">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody>
               {data.customers.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="text-center text-base-content/70">
                     No customers found.
                   </td>
                 </tr>
               ) : (
                 data.customers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="block lg:table-row hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  >
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Name:</span>
-                      <div className="font-medium text-right lg:text-left">
-                        {customer.firstName} {customer.lastName}
-                      </div>
+                  <tr key={customer.id} className="hover">
+                    <td className="font-medium">
+                      {customer.firstName} {customer.lastName}
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Email:</span>
-                      <div className="text-sm text-right lg:text-left">
-                        {customer.email}
-                      </div>
+                    <td className="text-base-content/70">{customer.email}</td>
+                    <td className="text-base-content/70">
+                      {customer.phone || "-"}
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Phone:</span>
-                      <div className="text-sm text-right lg:text-left">
-                        {customer.phone || "-"}
-                      </div>
+                    <td className="text-base-content/70">
+                      {customer.totalOrders}
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Orders:</span>
-                      <div className="text-sm text-right lg:text-left">
-                        {customer.totalOrders}
-                      </div>
+                    <td className="text-base-content/70">
+                      ${customer.totalSpent.toFixed(2)}
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">
-                        Total Spent:
-                      </span>
-                      <div className="text-sm text-right lg:text-left">
-                        ${customer.totalSpent.toFixed(2)}
-                      </div>
-                    </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Status:</span>
+                    <td>
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                        className={`badge ${
                           customer.status === "ACTIVE"
-                            ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
+                            ? "badge-success"
+                            : "badge-warning"
                         }`}
                       >
                         {customer.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 lg:text-right">
+                    <td>
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(customer)}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="btn btn-ghost btn-sm btn-square"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteCustomer(customer.id)}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="btn btn-ghost btn-sm btn-square text-error"
                         >
                           <Trash className="h-4 w-4" />
                         </button>

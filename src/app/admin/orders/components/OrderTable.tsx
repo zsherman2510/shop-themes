@@ -32,37 +32,37 @@ export default function OrdersTable({
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState(initialData);
 
-  const getStatusColor = (status: OrderStatus) => {
+  const getStatusBadgeClass = (status: OrderStatus) => {
     switch (status) {
       case "PENDING":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400";
+        return "badge-warning";
       case "PROCESSING":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400";
+        return "badge-info";
       case "SHIPPED":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400";
+        return "badge-secondary";
       case "DELIVERED":
-        return "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400";
+        return "badge-success";
       case "CANCELLED":
-        return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400";
+        return "badge-error";
       case "REFUNDED":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400";
+        return "badge-ghost";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400";
+        return "badge-ghost";
     }
   };
 
-  const getPaymentStatusColor = (status: PaymentStatus) => {
+  const getPaymentStatusBadgeClass = (status: PaymentStatus) => {
     switch (status) {
       case "PENDING":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400";
+        return "badge-warning";
       case "PAID":
-        return "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400";
+        return "badge-success";
       case "FAILED":
-        return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400";
+        return "badge-error";
       case "REFUNDED":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400";
+        return "badge-ghost";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400";
+        return "badge-ghost";
     }
   };
 
@@ -93,101 +93,77 @@ export default function OrdersTable({
   return (
     <>
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-900/50 dark:text-red-200">
-          {error}
+        <div className="alert alert-error">
+          <p>{error}</p>
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+      <div className="card bg-base-100">
         <div className="overflow-x-auto">
-          <table className="w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <table className="table">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Order Details
-                </th>
+              <tr>
+                <th className="text-base-content/70">Order Number</th>
+                <th className="text-base-content/70">Customer</th>
+                <th className="text-base-content/70">Status</th>
+                <th className="text-base-content/70">Payment</th>
+                <th className="text-base-content/70">Total</th>
+                <th className="text-base-content/70">Date</th>
+                <th className="text-base-content/70">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody>
               {data.orders.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="text-center text-base-content/70">
                     No orders found.
                   </td>
                 </tr>
               ) : (
                 data.orders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="block lg:table-row hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  >
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">
-                        Order Number:
-                      </span>
-                      <div className="font-medium text-right lg:text-left">
-                        {order.orderNumber}
-                      </div>
-                    </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Customer:</span>
-                      <div className="text-right lg:text-left">
-                        {order.customer ? (
-                          <div>
-                            <div>
-                              {order.customer.firstName}{" "}
-                              {order.customer.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {order.customer.email}
-                            </div>
+                  <tr key={order.id} className="hover">
+                    <td className="font-medium">{order.orderNumber}</td>
+                    <td>
+                      {order.customer ? (
+                        <div>
+                          <div className="font-medium">
+                            {order.customer.firstName} {order.customer.lastName}
                           </div>
-                        ) : (
-                          "Guest"
-                        )}
-                      </div>
+                          <div className="text-sm text-base-content/60">
+                            {order.customer.email}
+                          </div>
+                        </div>
+                      ) : (
+                        "Guest"
+                      )}
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Status:</span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                          order.status
-                        )}`}
+                    <td>
+                      <div
+                        className={`badge ${getStatusBadgeClass(order.status)}`}
                       >
                         {order.status}
-                      </span>
+                      </div>
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Payment:</span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getPaymentStatusColor(
-                          order.paymentStatus as PaymentStatus
-                        )}`}
+                    <td>
+                      <div
+                        className={`badge ${getPaymentStatusBadgeClass(order.paymentStatus as PaymentStatus)}`}
                       >
                         {order.paymentStatus}
-                      </span>
-                    </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Total:</span>
-                      <div className="text-sm text-right lg:text-left">
-                        ${order.total.toFixed(2)}
                       </div>
                     </td>
-                    <td className="flex justify-between px-4 py-3 lg:table-cell">
-                      <span className="font-medium lg:hidden">Date:</span>
-                      <div className="text-sm text-right lg:text-left">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </div>
+                    <td className="text-base-content/70">
+                      ${order.total.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 lg:text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(order)}
-                          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                      </div>
+                    <td className="text-base-content/70">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => openEditModal(order)}
+                        className="btn btn-ghost btn-sm btn-square"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))

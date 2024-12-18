@@ -67,12 +67,9 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
         <form action={revalidateDashboard}>
-          <button
-            type="submit"
-            className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
-          >
+          <button type="submit" className="btn btn-neutral btn-sm gap-2">
             <RefreshCw className="h-4 w-4" />
             Refresh Data
           </button>
@@ -86,63 +83,69 @@ export default async function DashboardPage() {
           return (
             <div
               key={stat.title}
-              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"
+              className="bg-base-100 p-6 rounded-xl shadow-sm border border-base-200"
             >
               <div className="flex items-center justify-between mb-4">
-                <Icon className="text-gray-400" size={24} />
+                <Icon className="text-base-content/50" size={24} />
                 <span
                   className={`text-sm font-medium ${
                     stat.changeType === "positive"
-                      ? "text-green-600"
+                      ? "text-success"
                       : stat.changeType === "negative"
-                        ? "text-red-600"
-                        : "text-gray-600"
+                        ? "text-error"
+                        : "text-base-content/70"
                   }`}
                 >
                   {stat.change}
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-1">{stat.value}</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {stat.title}
-              </p>
+              <h3 className="text-2xl font-bold mb-1 text-base-content">
+                {stat.value}
+              </h3>
+              <p className="text-base-content/70 text-sm">{stat.title}</p>
             </div>
           );
         })}
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
+      <div className="bg-base-100 rounded-xl shadow-sm p-6 border border-base-200">
+        <h2 className="text-lg font-semibold mb-4 text-base-content">
+          Recent Orders
+        </h2>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="table">
             <thead>
-              <tr className="text-left border-b dark:border-gray-700">
-                <th className="pb-3 font-medium">Order ID</th>
-                <th className="pb-3 font-medium">Customer</th>
-                <th className="pb-3 font-medium">Total</th>
-                <th className="pb-3 font-medium">Status</th>
-                <th className="pb-3 font-medium">Date</th>
+              <tr>
+                <th className="font-medium">Order ID</th>
+                <th className="font-medium">Customer</th>
+                <th className="font-medium">Total</th>
+                <th className="font-medium">Status</th>
+                <th className="font-medium">Date</th>
               </tr>
             </thead>
             <tbody>
               {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b dark:border-gray-700">
-                  <td className="py-3">#{order.id}</td>
-                  <td className="py-3">{order.customer}</td>
-                  <td className="py-3">
-                    ${Number(order.total).toLocaleString()}
-                  </td>
-                  <td className="py-3">
+                <tr key={order.id}>
+                  <td>#{order.id}</td>
+                  <td>{order.customer}</td>
+                  <td>${Number(order.total).toLocaleString()}</td>
+                  <td>
                     <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getOrderStatusStyle(order.status)}`}
+                      className={`badge ${
+                        order.status === "SHIPPED"
+                          ? "badge-success"
+                          : order.status === "PENDING"
+                            ? "badge-warning"
+                            : order.status === "CANCELLED"
+                              ? "badge-error"
+                              : "badge-info"
+                      }`}
                     >
                       {order.status}
                     </span>
                   </td>
-                  <td className="py-3">
-                    {new Date(order.date).toLocaleDateString()}
-                  </td>
+                  <td>{new Date(order.date).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

@@ -53,6 +53,19 @@ export default function UserTable({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const getStatusBadgeClass = (status: UserStatus) => {
+    switch (status) {
+      case UserStatus.ACTIVE:
+        return "badge-success";
+      case UserStatus.INACTIVE:
+        return "badge-ghost";
+      case UserStatus.BANNED:
+        return "badge-error";
+      default:
+        return "badge-ghost";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -62,13 +75,13 @@ export default function UserTable({
             placeholder="Search users..."
             defaultValue={searchParams.search}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100"
+            className="input input-bordered w-full"
           />
         </div>
         <select
           defaultValue={searchParams.role || "all"}
           onChange={(e) => handleRoleFilter(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-100 dark:focus:ring-gray-100 sm:w-auto"
+          className="select select-bordered w-full sm:w-auto"
         >
           <option value="all">All Roles</option>
           <option value={UserRole.TEAM}>Team</option>
@@ -76,107 +89,71 @@ export default function UserTable({
         </select>
       </div>
 
-      <div className="-mx-4 sm:mx-0 sm:rounded-lg sm:border sm:border-gray-200 sm:bg-white sm:dark:border-gray-800 sm:dark:bg-gray-900">
-        <div className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-          <div className="hidden sm:block">
-            <div className="border-b border-gray-200 dark:border-gray-800">
-              <div className="grid grid-cols-5 px-4 py-3">
-                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Name
-                </div>
-                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Email
-                </div>
-                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Role
-                </div>
-                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Status
-                </div>
-                <div className="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Joined
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            {initialData.users.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                No users found.
-              </div>
-            ) : (
-              initialData.users.map((user) => (
-                <div
-                  key={user.id}
-                  onClick={() => router.push(`/admin/users/${user.id}`)}
-                  className="cursor-pointer border-b border-gray-200 bg-white last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
-                >
-                  <div className="grid grid-cols-1 gap-1 px-4 py-4 sm:grid-cols-5 sm:gap-4 sm:py-3">
-                    <div className="font-medium">
-                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400 sm:hidden">
-                        Name:{" "}
-                      </span>
+      <div className="card bg-base-100">
+        <div className="overflow-x-auto">
+          <table className="table">
+            <thead>
+              <tr>
+                <th className="text-base-content/60">Name</th>
+                <th className="text-base-content/60">Email</th>
+                <th className="text-base-content/60">Role</th>
+                <th className="text-base-content/60">Status</th>
+                <th className="text-base-content/60">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {initialData.users.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center text-base-content/60">
+                    No users found.
+                  </td>
+                </tr>
+              ) : (
+                initialData.users.map((user) => (
+                  <tr
+                    key={user.id}
+                    onClick={() => router.push(`/admin/users/${user.id}`)}
+                    className="hover cursor-pointer"
+                  >
+                    <td className="font-medium">
                       {user.firstName} {user.lastName}
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
-                        Email:{" "}
-                      </span>
-                      {user.email}
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
-                        Role:{" "}
-                      </span>
-                      {user.role}
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400 sm:hidden">
-                        Status:{" "}
-                      </span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          user.status === UserStatus.ACTIVE
-                            ? "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                            : user.status === UserStatus.INACTIVE
-                              ? "bg-gray-50 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400"
-                              : "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
-                        }`}
+                    </td>
+                    <td className="text-base-content/70">{user.email}</td>
+                    <td className="text-base-content/70">{user.role}</td>
+                    <td>
+                      <div
+                        className={`badge ${getStatusBadgeClass(user.status)}`}
                       >
                         {user.status}
-                      </span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-gray-500 dark:text-gray-400 sm:hidden">
-                        Joined:{" "}
-                      </span>
+                      </div>
+                    </td>
+                    <td className="text-base-content/70">
                       {formatDate(user.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {initialData.pageCount > 1 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm text-base-content/60">
             {initialData.total} users total
           </div>
-          <div className="flex items-center gap-2">
+          <div className="join">
             {Array.from({ length: initialData.pageCount }, (_, i) => i + 1).map(
               (page) => (
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
                   disabled={page === Number(searchParams.page)}
-                  className={`rounded-lg px-3 py-1 text-sm font-medium ${
+                  className={`btn btn-sm join-item ${
                     page === Number(searchParams.page)
-                      ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-                      : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      ? "btn-active"
+                      : "btn-ghost"
                   }`}
                 >
                   {page}

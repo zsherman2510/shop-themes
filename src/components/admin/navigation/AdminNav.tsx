@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ButtonSignin from "@/components/buttons/ButtonSignin";
+import ThemeToggle from "@/components/theme-toggle";
+
 const AdminNav = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -78,7 +80,7 @@ const AdminNav = () => {
 
   const NavContent = () => (
     <>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-base-200 text-base-content">
         <Link
           href="/admin"
           className={`font-bold transition-all duration-300 ${
@@ -90,7 +92,7 @@ const AdminNav = () => {
         {!isMobile && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 rounded-lg hover:bg-base-200"
           >
             <ChevronRight
               size={20}
@@ -113,8 +115,8 @@ const AdminNav = () => {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 group ${
                   isActive
-                    ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    ? "bg-base-200 text-base-content"
+                    : "text-base-content/70 hover:bg-base-200/50 hover:text-base-content"
                 }`}
               >
                 <Icon
@@ -135,8 +137,13 @@ const AdminNav = () => {
           })}
         </div>
 
-        {/* Add ButtonSignin at bottom */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+        {/* Footer with Theme Toggle and Sign In */}
+        <div className="p-4 border-t border-base-200 space-y-2">
+          <div
+            className={`flex items-center justify-center ${!isCollapsed ? "mb-2" : ""}`}
+          >
+            <ThemeToggle />
+          </div>
           <ButtonSignin
             extraStyle={`w-full justify-start ${isCollapsed ? "px-2" : "px-4"}`}
           />
@@ -152,7 +159,7 @@ const AdminNav = () => {
         <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center justify-center w-12 h-24 bg-white dark:bg-gray-900 shadow-lg rounded-r-xl border border-l-0 border-gray-200 dark:border-gray-800 transition-all duration-300 hover:w-14 group ${
+            className={`flex items-center justify-center w-12 h-24 bg-base-100 shadow-lg rounded-r-xl border border-l-0 border-base-200 transition-all duration-300 hover:w-14 group ${
               isOpen ? "translate-x-64" : "translate-x-0"
             }`}
           >
@@ -185,7 +192,7 @@ const AdminNav = () => {
           />
 
           {/* Navigation Content */}
-          <nav className="relative w-64 h-full bg-white dark:bg-gray-900 shadow-xl">
+          <nav className="relative w-64 h-full bg-base-100 shadow-xl">
             <NavContent />
           </nav>
         </div>
@@ -194,7 +201,7 @@ const AdminNav = () => {
   }
   return (
     <nav
-      className={`h-screen overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 ${
+      className={`h-screen overflow-y-auto transition-all duration-300 bg-base-100 border-r border-base-200 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >
