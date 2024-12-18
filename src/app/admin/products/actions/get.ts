@@ -106,7 +106,8 @@ export async function getProducts({
   }
 }
 
-export async function getProduct(id: string) {
+// Admin version - Full details
+export async function getAdminProduct(id: string) {
   try {
     const product = await prisma.products.findUnique({
       where: { id },
@@ -151,4 +152,4 @@ export async function getProduct(id: string) {
     console.error("Error getting product:", error);
     throw error;
   }
-} 
+}

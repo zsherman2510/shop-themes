@@ -7,6 +7,8 @@ import { createProduct, deleteProduct, updateProduct } from "../actions";
 import ProductModal from "./ProductModal";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ProductsTableProps {
   initialData: {
@@ -25,6 +27,7 @@ export default function ProductsTable({
   initialData,
   searchParams,
 }: ProductsTableProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<
     ProductResponse | undefined
@@ -137,7 +140,11 @@ export default function ProductsTable({
                 </tr>
               ) : (
                 data.products.map((product) => (
-                  <tr key={product.id} className="hover">
+                  <tr
+                    key={product.id}
+                    className="hover cursor-pointer"
+                    onClick={() => router.push(`/admin/products/${product.id}`)}
+                  >
                     <td>
                       <div className="flex items-center gap-3">
                         {product.images[0] && (
@@ -154,7 +161,9 @@ export default function ProductsTable({
                           </div>
                         )}
                         <div>
-                          <div className="font-medium">{product.name}</div>
+                          <div className="font-medium hover:text-primary">
+                            {product.name}
+                          </div>
                           {product.description && (
                             <div className="text-sm text-base-content/60">
                               {product.description}
@@ -185,13 +194,19 @@ export default function ProductsTable({
                     <td>
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => openEditModal(product)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            openEditModal(product);
+                          }}
                           className="btn btn-ghost btn-sm btn-square"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleDeleteProduct(product.id);
+                          }}
                           className="btn btn-ghost btn-sm btn-square text-error"
                         >
                           <Trash className="h-4 w-4" />

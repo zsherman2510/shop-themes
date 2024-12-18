@@ -16,7 +16,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
+              href={`/store/products/${product.id}`}
               className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
               <figure className="aspect-w-16 aspect-h-9">

@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 
 export async function getProductsByCategory(categoryId: string) {
@@ -10,9 +12,13 @@ export async function getProductsByCategory(categoryId: string) {
 }
 
 export async function getProduct(productId: string) {
-  return prisma.products.findUnique({
+  return prisma.products.findFirst({
     where: {
       id: productId,
+      isActive: true,
+    },
+    include: {
+      category: true,
     },
   });
 }
