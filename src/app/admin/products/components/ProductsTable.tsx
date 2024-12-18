@@ -186,11 +186,6 @@ export default function ProductsTable({
                           <div className="font-medium hover:text-primary">
                             {product.name}
                           </div>
-                          {product.description && (
-                            <div className="text-sm text-base-content/60">
-                              {product.description}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </td>

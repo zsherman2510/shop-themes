@@ -67,11 +67,11 @@ const AdminNav = () => {
       href: "/admin/customers",
       icon: Users,
     },
-    {
-      title: "Pages",
-      href: "/admin/pages",
-      icon: FileText,
-    },
+    // {
+    //   title: "Pages",
+    //   href: "/admin/pages",
+    //   icon: FileText,
+    // },
     {
       title: "Settings",
       href: "/admin/settings",
@@ -164,21 +164,21 @@ const AdminNav = () => {
     return (
       <>
         {/* Mobile Navigation Button */}
-        <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50 text-base-content">
+        <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center justify-center w-12 h-24 bg-base-100 shadow-lg rounded-r-xl border border-l-0 border-base-200 transition-all duration-300 hover:w-14 group ${
+            className={`flex items-center justify-center w-8 h-16 bg-base-100 shadow-lg rounded-r-xl border border-l-0 border-base-200 transition-all duration-300 hover:w-10 group ${
               isOpen ? "translate-x-64" : "translate-x-0"
             }`}
           >
             {isOpen ? (
               <X
-                size={24}
+                size={18}
                 className="transition-transform duration-300 group-hover:scale-110"
               />
             ) : (
               <Menu
-                size={24}
+                size={18}
                 className="transition-transform duration-300 group-hover:scale-110"
               />
             )}
