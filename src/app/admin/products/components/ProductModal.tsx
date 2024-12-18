@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { ProductResponse } from "../actions/get";
 import ProductForm from "./ProductForm";
 import { useState } from "react";
+import { Category } from "@/app/_actions/store/categories";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ProductModalProps {
   onSubmit: (data: any) => Promise<void>;
   product?: ProductResponse;
   isLoading?: boolean;
+  categories: Category[];
 }
 
 export default function ProductModal({
@@ -20,6 +22,7 @@ export default function ProductModal({
   onSubmit,
   product,
   isLoading,
+  categories,
 }: ProductModalProps) {
   const [error, setError] = useState<string | null>(null);
 
@@ -76,6 +79,7 @@ export default function ProductModal({
               onSubmit={handleSubmit}
               defaultValues={product}
               isLoading={isLoading}
+              categories={categories}
             />
           </div>
         </Dialog.Content>

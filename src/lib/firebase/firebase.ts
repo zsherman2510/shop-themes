@@ -10,7 +10,6 @@ if (!serviceAccountBase64) {
 const serviceAccount = JSON.parse(
   Buffer.from(serviceAccountBase64, "base64").toString("utf-8")
 );
-console.log("FIREBASE_STORAGE_BUCKET", process.env.FIREBASE_STORAGE_BUCKET);
 
 if (!admin.apps.length) {
   try {
@@ -98,10 +97,9 @@ export async function uploadToFirebase(file: File) {
       blobStream.on("finish", async () => {
         try {
           await blob.makePublic();
-          console.log("bucket.name", bucket.name);
+
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/${uniqueFilename}`;
-          console.log("publicUrl", publicUrl);
-          console.log(`File uploaded: ${uniqueFilename}`);
+
           resolve(publicUrl);
         } catch (error) {
           console.error("Error making file public:", error);

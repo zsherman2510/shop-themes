@@ -7,8 +7,9 @@ import { createProduct, deleteProduct, updateProduct } from "../actions";
 import ProductModal from "./ProductModal";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getProducts } from "../actions/get";
+import { Category } from "@/app/_actions/store/categories";
 
 interface ProductsTableProps {
   initialData: {
@@ -21,11 +22,13 @@ interface ProductsTableProps {
     categoryId?: string;
     page: string;
   };
+  categories: Category[];
 }
 
 export default function ProductsTable({
   initialData,
   searchParams,
+  categories,
 }: ProductsTableProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,9 +49,12 @@ export default function ProductsTable({
         throw result.error;
       }
 
-      const updatedData = await fetch(
-        `/admin/products?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
+      const updatedData = await getProducts({
+        search: searchParams.search,
+        categoryId: searchParams.categoryId,
+        page: Number(searchParams.page),
+        limit: 10,
+      });
       setData(updatedData);
       setIsModalOpen(false);
       toast.success("Product created successfully");
@@ -62,15 +68,28 @@ export default function ProductsTable({
     try {
       setIsLoading(true);
       setError(null);
-      await updateProduct(selectedProduct.id, formData);
-      const updatedData = await fetch(
-        `/admin/products?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
+      console.log(formData, "formData");
+      const result = await updateProduct(selectedProduct.id, formData);
+      console.log(result, "result");
+      if (!result.success) {
+        console.log("Server error:", result.error);
+        throw result.error;
+      }
+      const updatedData = await getProducts({
+        search: searchParams.search,
+        categoryId: searchParams.categoryId,
+        page: Number(searchParams.page),
+        limit: 10,
+      });
       setData(updatedData);
       setIsModalOpen(false);
+      toast.success("Product updated successfully");
     } catch (error: any) {
       console.error("Error updating product:", error);
       setError(error.message || "Failed to update product. Please try again.");
+      toast.error(
+        error.message || "Failed to update product. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +100,12 @@ export default function ProductsTable({
     try {
       setError(null);
       await deleteProduct(id);
-      const updatedData = await fetch(
-        `/admin/products?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
+      const updatedData = await getProducts({
+        search: searchParams.search,
+        categoryId: searchParams.categoryId,
+        page: Number(searchParams.page),
+        limit: 10,
+      });
       setData(updatedData);
     } catch (error: any) {
       console.error("Error deleting product:", error);
@@ -229,6 +251,7 @@ export default function ProductsTable({
           setError(null);
         }}
         onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
+        categories={categories}
         product={selectedProduct}
         isLoading={isLoading}
       />

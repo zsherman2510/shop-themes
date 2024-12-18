@@ -1,3 +1,4 @@
+import { getCategories } from "@/app/_actions/store/categories";
 import { getProducts } from "./actions/get";
 import ProductsTable from "./components/ProductsTable";
 
@@ -27,6 +28,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     limit: 10,
   });
 
+  const categories = await getCategories();
+
   return (
     <div className="space-y-6">
       <div>
@@ -40,6 +43,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
       <ProductsTable
         initialData={productsData}
+        categories={categories}
         searchParams={{
           search,
           categoryId,

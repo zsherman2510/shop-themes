@@ -4,17 +4,20 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ProductResponse } from "../actions/get";
 import { ProductType } from "@prisma/client";
+import { Category } from "@/app/_actions/store/categories";
 
 interface ProductFormProps {
   onSubmit: (data: FormData) => Promise<void>;
   defaultValues?: ProductResponse;
   isLoading?: boolean;
+  categories: Category[];
 }
 
 export default function ProductForm({
   onSubmit,
   defaultValues,
   isLoading,
+  categories,
 }: ProductFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -218,7 +221,11 @@ Need help? Contact support@premiumtheme.com`,
             className="select select-bordered w-full"
           >
             <option value="">Select a category</option>
-            {/* TODO: Add categories from API */}
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>

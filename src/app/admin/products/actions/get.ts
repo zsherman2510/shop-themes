@@ -94,6 +94,7 @@ export async function getProducts({
       ...product,
       price: Number(product.price),
     }));
+    console.log(formattedProducts, "formattedProducts");
 
     return {
       products: formattedProducts,
