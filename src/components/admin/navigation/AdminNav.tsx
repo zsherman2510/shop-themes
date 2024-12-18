@@ -85,7 +85,7 @@ const AdminNav = () => {
   ];
 
   const NavContent = () => (
-    <>
+    <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b border-base-200 text-base-content">
         <Link
           href="/admin"
@@ -109,8 +109,9 @@ const AdminNav = () => {
           </button>
         )}
       </div>
-      <div className="flex flex-col h-[calc(100vh-64px)]">
-        <div className="p-4 flex-1">
+
+      <div className="flex flex-col flex-1 justify-between">
+        <div className="p-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -121,8 +122,10 @@ const AdminNav = () => {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 group ${
                   isActive
-                    ? "bg-base-200 text-base-content"
-                    : "text-base-content/70 hover:bg-base-200/50 hover:text-base-content"
+                    ? "bg-base-200 text-base-content font-medium"
+                    : isMobile
+                      ? "text-base-content hover:bg-base-200/50 hover:text-base-content"
+                      : "text-base-content/80 hover:bg-base-200/50 hover:text-base-content dark:text-base-content/60 dark:hover:text-base-content"
                 }`}
               >
                 <Icon
@@ -133,7 +136,7 @@ const AdminNav = () => {
                 />
                 <span
                   className={`whitespace-nowrap transition-all duration-300 ${
-                    isCollapsed ? "opacity-0 w-0" : "opacity-100"
+                    isCollapsed && !isMobile ? "hidden" : "block"
                   }`}
                 >
                   {item.title}
@@ -143,8 +146,7 @@ const AdminNav = () => {
           })}
         </div>
 
-        {/* Footer with Theme Toggle and Sign In */}
-        <div className="p-4 border-t border-base-200 space-y-2">
+        <div className="p-4 border-t border-base-200 mt-auto">
           <div
             className={`flex items-center justify-center ${!isCollapsed ? "mb-2" : ""}`}
           >
@@ -155,14 +157,14 @@ const AdminNav = () => {
           />
         </div>
       </div>
-    </>
+    </div>
   );
 
   if (isMobile) {
     return (
       <>
         {/* Mobile Navigation Button */}
-        <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50">
+        <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50 text-base-content">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`flex items-center justify-center w-12 h-24 bg-base-100 shadow-lg rounded-r-xl border border-l-0 border-base-200 transition-all duration-300 hover:w-14 group ${
@@ -189,7 +191,6 @@ const AdminNav = () => {
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {/* Backdrop */}
           <div
             className={`absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
               isOpen ? "opacity-100" : "opacity-0"
@@ -197,17 +198,17 @@ const AdminNav = () => {
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Navigation Content */}
-          <nav className="relative w-64 h-full bg-base-100 shadow-xl">
+          <nav className="relative w-64 h-full bg-base-100 text-base-content shadow-xl">
             <NavContent />
           </nav>
         </div>
       </>
     );
   }
+
   return (
     <nav
-      className={`h-screen overflow-y-auto transition-all duration-300 bg-base-100 border-r border-base-200 ${
+      className={`h-screen sticky top-0 bg-base-100 border-r border-base-200 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >
