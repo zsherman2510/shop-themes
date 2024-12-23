@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Products } from "@prisma/client";
 
+const PLACEHOLDER_IMAGE =
+  "https://placehold.co/600x400/FAFAFA/A3A3A3?text=Product+Image";
+
 interface ProductCardProps {
   product: Products;
 }
@@ -11,7 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="group relative">
         <div className="aspect-square w-full overflow-hidden rounded-lg">
           <img
-            src={product.images[0]}
+            src={product.images[0] || PLACEHOLDER_IMAGE}
             alt={product.name}
             className="h-full w-full object-cover object-center group-hover:opacity-75"
           />

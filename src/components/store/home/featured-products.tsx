@@ -5,6 +5,9 @@ interface FeaturedProductsProps {
   products: Products[];
 }
 
+const PLACEHOLDER_IMAGE =
+  "https://placehold.co/600x400/FAFAFA/A3A3A3?text=Product+Image";
+
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-base-200">
@@ -21,7 +24,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             >
               <figure className="aspect-w-16 aspect-h-9">
                 <img
-                  src={product.images[0]}
+                  src={product.images[0] || PLACEHOLDER_IMAGE}
                   alt={product.name}
                   className="object-cover w-full h-full transform hover:scale-105 transition-transform duration-300"
                 />

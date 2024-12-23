@@ -5,12 +5,12 @@ import { notFound } from "next/navigation";
 
 interface CategoryPageProps {
   params: {
-    slug: string;
+    id: string;
   };
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const category = await getCategory(params.slug);
+  const category = await getCategory(params.id);
 
   if (!category) {
     notFound();

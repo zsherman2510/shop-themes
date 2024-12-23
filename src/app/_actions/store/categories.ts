@@ -18,10 +18,10 @@ export async function getCategories() {
   });
 }
 
-export async function getCategory(slug: string) {
+export async function getCategory(id: string) {
   return prisma.categories.findUnique({
     where: {
-      slug,
+      id,
     },
   });
 }
