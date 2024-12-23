@@ -216,32 +216,42 @@ model Themes {
 }
 
 model Pages {
-  id          String        @id @default(cuid())
-  title       String
-  content     Json
-  status      PageStatus    @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  parentId    String?
-  parent      Pages?        @relation("PageHierarchy", fields: [parentId], references: [id])
-  children    Pages[]       @relation("PageHierarchy")
-  sections    Sections[]
-  permissions Permissions[] @relation("PageToPermission")
+  id               String         @id @default(cuid())
+  title            String
+  slug             String         @unique
+  content          Json?
+  status           PageStatus     @default(DRAFT)
+  layout           PageLayout     @default(FULL_WIDTH)
+  isSystem         Boolean        @default(false)
+  templateId       String?
+  metaTitle        String?
+  metaDescription  String?
+  ogImage          String?
+  showInNavigation Boolean        @default(true)
+  navigationLabel  String?
+  navigationOrder  Int?
+  visibility       PageVisibility @default(PUBLIC)
+  publishedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  parentId         String?
+  parent           Pages?         @relation("PageHierarchy", fields: [parentId], references: [id])
+  children         Pages[]        @relation("PageHierarchy")
+  template         Templates?     @relation(fields: [templateId], references: [id])
+  sections         Sections[]
+  permissions      Permissions[]  @relation("PageToPermission")
 }
 
 model Sections {
   id        String      @id @default(cuid())
   type      SectionType
-  title     String?
-  content   Json
-  style     Json?
-  order     Int
+  content   Json // Will store the section-specific content
   isActive  Boolean     @default(true)
+  order     Int
+  pageId    String
+  page      Pages       @relation(fields: [pageId], references: [id], onDelete: Cascade)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  pageId    String
-  settings  Json?
-  page      Pages       @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@index([pageId, order])
 }
@@ -318,6 +328,7 @@ model Templates {
   settings    Json?
   thumbnail   String?
   type        PageType
+  pages       Pages[]
 }
 
 model ShippingZones {
@@ -465,32 +476,30 @@ enum PageLayout {
 enum SectionType {
   HERO
   FEATURED_PRODUCTS
-  PRODUCT_GRID
-  TEXT_BLOCK
-  IMAGE_GALLERY
+  CATEGORIES
   NEWSLETTER
-  TESTIMONIALS
-  CONTACT_FORM
-  CUSTOM_HTML
-  CATEGORY_SHOWCASE
+  TEXT_BLOCK
+  PRODUCT_GRID
   BANNER
-  COUNTDOWN
-  SOCIAL_FEED
-  VIDEO
-  FAQ
-  PRICING_TABLE
-  TEAM_MEMBERS
-  BLOG_POSTS
-  ANNOUNCEMENT_BAR
-  COLLECTION_LIST
-  PROMOTION_BANNER
-  REVIEWS
-  SIZE_CHART
   PRODUCT_COMPARISON
   RELATED_PRODUCTS
   RECENTLY_VIEWED
   INSTAGRAM_FEED
   STORE_LOCATOR
+  TESTIMONIALS
+  CONTACT_FORM
+  CUSTOM_HTML
+  CATEGORY_SHOWCASE
+  ANNOUNCEMENT_BAR
+  COLLECTION_LIST
+  PROMOTION_BANNER
+  REVIEWS
+  SIZE_CHART
+  VIDEO
+  FAQ
+  PRICING_TABLE
+  TEAM_MEMBERS
+  BLOG_POSTS
 }
 
 enum NavigationType {
@@ -510,15 +519,6 @@ enum PageType {
   CART
   ACCOUNT
   CUSTOM
-}
-
-enum DigitalType {
-  THEME
-  TEMPLATE
-  PLUGIN
-  ASSET_PACK
-  COMPONENT
-  APP
 }
 
 enum LicenseType {

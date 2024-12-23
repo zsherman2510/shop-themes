@@ -1,8 +1,63 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { PageStatus, Prisma } from "@prisma/client";
-import { PageContent, PageDetails, GetPagesResponse } from "@/types/pages";
+import { PageStatus, Prisma, SectionType as PrismaSectionType } from "@prisma/client";
+import { PageDetails, GetPagesResponse, PageSection } from "@/types/pages";
+
+// Helper function to convert section data to the correct type
+function convertSection(section: {
+  id: string;
+  type: PrismaSectionType;
+  content: any;
+  isActive: boolean;
+  order: number;
+}): PageSection {
+  const baseSection = {
+    id: section.id,
+    isActive: section.isActive,
+    order: section.order,
+  };
+
+  switch (section.type) {
+    case 'HERO':
+      return {
+        ...baseSection,
+        type: 'hero',
+        content: {
+          title: section.content.title || '',
+          description: section.content.description || '',
+          ctaText: section.content.ctaText,
+          ctaLink: section.content.ctaLink,
+          image: section.content.image,
+          overlayColor: section.content.overlayColor,
+          textColor: section.content.textColor,
+        },
+      };
+    case 'FEATURED_PRODUCTS':
+      return {
+        ...baseSection,
+        type: 'featuredProducts',
+        content: {
+          title: section.content.title || '',
+          productIds: section.content.productIds || [],
+          displayCount: section.content.displayCount || 4,
+        },
+      };
+    case 'CATEGORIES':
+      return {
+        ...baseSection,
+        type: 'categories',
+        content: {
+          title: section.content.title || '',
+          categoryIds: section.content.categoryIds || [],
+          layout: section.content.layout || 'grid',
+        },
+      };
+    default:
+      // This ensures type safety by making sure we handle all section types
+      throw new Error(`Unsupported section type: ${section.type}`);
+  }
+}
 
 export async function getPages({
   search = "",
@@ -34,9 +89,9 @@ export async function getPages({
         select: {
           id: true,
           title: true,
+          slug: true,
           status: true,
           updatedAt: true,
-          content: true,
         },
       }),
       prisma.pages.count({ where }),
@@ -61,20 +116,9 @@ export async function getPage(id: string): Promise<PageDetails | null> {
   try {
     const page = await prisma.pages.findUnique({
       where: { id },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        status: true,
+      include: {
         sections: {
-          orderBy: { order: "asc" },
-          select: {
-            id: true,
-            type: true,
-            content: true,
-            order: true,
-            isActive: true,
-          },
+          orderBy: { order: 'asc' },
         },
       },
     });
@@ -86,8 +130,11 @@ export async function getPage(id: string): Promise<PageDetails | null> {
     return {
       id: page.id,
       title: page.title,
-      content: page.content as unknown as PageContent,
+      slug: page.slug,
       status: page.status,
+      sections: page.sections.map(convertSection),
+      metaTitle: page.metaTitle || undefined,
+      metaDescription: page.metaDescription || undefined,
     };
   } catch (error) {
     console.error("Error getting page:", error);
@@ -97,22 +144,69 @@ export async function getPage(id: string): Promise<PageDetails | null> {
 
 export async function initializeHomePage() {
   try {
-    // Retrieve all pages
-    const allPages = await prisma.pages.findMany({
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        content: true,
-        updatedAt: true,
+    // Check if home page exists
+    const homePage = await prisma.pages.findFirst({
+      where: {
+        slug: 'home',
+        isSystem: true,
       },
     });
 
-    console.log("All pages retrieved:", allPages); // Log the retrieved pages for debugging
+    // If home page doesn't exist, create it with default sections
+    if (!homePage) {
+      await prisma.pages.create({
+        data: {
+          title: 'Home',
+          slug: 'home',
+          status: PageStatus.PUBLISHED,
+          isSystem: true,
+          layout: 'FULL_WIDTH',
+          showInNavigation: true,
+          navigationLabel: 'Home',
+          navigationOrder: 0,
+          visibility: 'PUBLIC',
+          sections: {
+            create: [
+              {
+                type: PrismaSectionType.HERO,
+                content: {
+                  title: 'Welcome to Our Store',
+                  description: 'Discover amazing products at great prices',
+                  ctaText: 'Shop Now',
+                  ctaLink: '/products',
+                },
+                order: 0,
+                isActive: true,
+              },
+              {
+                type: PrismaSectionType.FEATURED_PRODUCTS,
+                content: {
+                  title: 'Featured Products',
+                  productIds: [],
+                  displayCount: 4,
+                },
+                order: 1,
+                isActive: true,
+              },
+              {
+                type: PrismaSectionType.CATEGORIES,
+                content: {
+                  title: 'Shop by Category',
+                  categoryIds: [],
+                  layout: 'grid',
+                },
+                order: 2,
+                isActive: true,
+              },
+            ],
+          },
+        },
+      });
+    }
 
-    return allPages; // Return the list of all pages
+    return true;
   } catch (error) {
-    console.error("Error retrieving pages:", error);
-    throw new Error("Failed to retrieve pages");
+    console.error("Error initializing home page:", error);
+    throw new Error("Failed to initialize home page");
   }
 } 

@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Plus } from "lucide-react";
 import { AdminUserResponse } from "@/types/admin";
 import { formatDate } from "@/lib/utils/";
 import { UserRole, UserStatus } from "@prisma/client";
+import UserModal from "./UserModal";
+import { createUser } from "../actions/create";
 
 interface UserTableProps {
   initialData: {
@@ -13,7 +17,7 @@ interface UserTableProps {
   };
   searchParams: {
     search?: string;
-    role?: string;
+    role?: UserRole;
     page?: string;
   };
 }
@@ -24,6 +28,10 @@ export default function UserTable({
 }: UserTableProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState(initialData);
 
   const handleSearch = async (value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -36,7 +44,7 @@ export default function UserTable({
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleRoleFilter = async (value: string) => {
+  const handleRoleFilter = async (value: UserRole | "all") => {
     const params = new URLSearchParams(searchParams);
     if (value !== "all") {
       params.set("role", value);
@@ -51,6 +59,24 @@ export default function UserTable({
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
     router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleCreateUser = async (formData: any) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await createUser(formData);
+      const updatedData = await fetch(
+        `/admin/users?${new URLSearchParams(searchParams)}`
+      ).then((res) => res.json());
+      setData(updatedData);
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      setError(error.message || "Failed to create user");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusBadgeClass = (status: UserStatus) => {
@@ -68,8 +94,8 @@ export default function UserTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 gap-4">
           <input
             type="text"
             placeholder="Search users..."
@@ -77,17 +103,28 @@ export default function UserTable({
             onChange={(e) => handleSearch(e.target.value)}
             className="input input-bordered w-full"
           />
+          <select
+            defaultValue={searchParams.role || "all"}
+            onChange={(e) =>
+              handleRoleFilter(e.target.value as UserRole | "all")
+            }
+            className="select select-bordered w-full sm:w-auto"
+          >
+            <option value="all">All Roles</option>
+            <option value={UserRole.TEAM}>Team</option>
+            <option value={UserRole.ADMIN}>Admin</option>
+          </select>
         </div>
-        <select
-          defaultValue={searchParams.role || "all"}
-          onChange={(e) => handleRoleFilter(e.target.value)}
-          className="select select-bordered w-full sm:w-auto"
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="btn btn-primary gap-2"
         >
-          <option value="all">All Roles</option>
-          <option value={UserRole.TEAM}>Team</option>
-          <option value={UserRole.ADMIN}>Admin</option>
-        </select>
+          <Plus className="h-4 w-4" />
+          Add User
+        </button>
       </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
 
       <div className="card bg-base-100">
         <div className="overflow-x-auto">
@@ -102,49 +139,51 @@ export default function UserTable({
               </tr>
             </thead>
             <tbody>
-              {initialData.users.length === 0 ? (
+              {data.users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center text-base-content/60">
                     No users found.
                   </td>
                 </tr>
               ) : (
-                initialData.users.map((user) => (
-                  <tr
-                    key={user.id}
-                    onClick={() => router.push(`/admin/users/${user.id}`)}
-                    className="hover cursor-pointer"
-                  >
-                    <td className="font-medium">
-                      {user.firstName} {user.lastName}
-                    </td>
-                    <td className="text-base-content/70">{user.email}</td>
-                    <td className="text-base-content/70">{user.role}</td>
-                    <td>
-                      <div
-                        className={`badge ${getStatusBadgeClass(user.status)}`}
-                      >
-                        {user.status}
-                      </div>
-                    </td>
-                    <td className="text-base-content/70">
-                      {formatDate(user.createdAt)}
-                    </td>
-                  </tr>
-                ))
+                data.users
+                  .filter(
+                    (user) =>
+                      user.role === UserRole.ADMIN ||
+                      user.role === UserRole.TEAM
+                  )
+                  .map((user) => (
+                    <tr key={user.id} className="hover">
+                      <td className="font-medium">
+                        {user.firstName} {user.lastName}
+                      </td>
+                      <td className="text-base-content/70">{user.email}</td>
+                      <td className="text-base-content/70">{user.role}</td>
+                      <td>
+                        <div
+                          className={`badge ${getStatusBadgeClass(user.status)}`}
+                        >
+                          {user.status}
+                        </div>
+                      </td>
+                      <td className="text-base-content/70">
+                        {formatDate(user.createdAt)}
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {initialData.pageCount > 1 && (
+      {data.pageCount > 1 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-base-content/60">
-            {initialData.total} users total
+            {data.total} users total
           </div>
           <div className="join">
-            {Array.from({ length: initialData.pageCount }, (_, i) => i + 1).map(
+            {Array.from({ length: data.pageCount }, (_, i) => i + 1).map(
               (page) => (
                 <button
                   key={page}
@@ -163,6 +202,16 @@ export default function UserTable({
           </div>
         </div>
       )}
+
+      <UserModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setError(null);
+        }}
+        onSubmit={handleCreateUser}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

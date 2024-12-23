@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { AdminUserResponse } from "@/types/admin";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 
 export async function getUsers({
   search = "",
@@ -11,7 +11,7 @@ export async function getUsers({
   limit = 10,
 }: {
   search?: string;
-  role?: string;
+  role?: UserRole;
   page?: number;
   limit?: number;
 }) {
@@ -19,6 +19,8 @@ export async function getUsers({
     const skip = (page - 1) * limit;
 
     const where: Prisma.UserWhereInput = {
+      role: role || { in: [UserRole.ADMIN, UserRole.TEAM] },
+      NOT: { role: "CUSTOMER" },
       ...(search && {
         OR: [
           { email: { contains: search, mode: "insensitive" } },
@@ -26,7 +28,6 @@ export async function getUsers({
           { lastName: { contains: search, mode: "insensitive" } },
         ],
       }),
-      ...(role && { role: role as any }),
     };
 
     const [users, count] = await Promise.all([
@@ -63,7 +64,10 @@ export async function getUsers({
 export async function getUser(id: string): Promise<AdminUserResponse> {
   try {
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { 
+        id,
+        NOT: { role: "CUSTOMER" }
+      },
       select: {
         id: true,
         email: true,

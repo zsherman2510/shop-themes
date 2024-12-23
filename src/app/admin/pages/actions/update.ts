@@ -1,47 +1,84 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { PageContent } from "@/types/pages";
-import { uploadImageToFirebase } from "@/lib/firebase/firebase"; // Import the upload function
-import { Prisma } from "@prisma/client";
+import { PageSection } from "@/types/pages";
+import { uploadImageToFirebase } from "@/lib/firebase/firebase";
+import { Prisma, SectionType } from "@prisma/client";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+
+interface UpdatePageData {
+  title: string;
+  sections: PageSection[];
+  metaTitle?: string;
+  metaDescription?: string;
+  files?: Record<string, File>;
+}
+
+// Add type conversion helper
+function convertToSectionType(type: string): SectionType {
+  return type.toUpperCase() as SectionType;
+}
 
 export async function updatePage(formData: FormData, id: string): Promise<{ success: boolean; error?: string }> {
   try {
     // Parse form data
-    const data = {
+    const data: UpdatePageData = {
       title: formData.get('title') as string,
-      content: JSON.parse(formData.get('content') as string) as PageContent,
-      file: formData.get('file') as File | null, // Get the file from form data
+      sections: JSON.parse(formData.get('sections') as string) as PageSection[],
+      metaTitle: (formData.get('metaTitle') as string) || undefined,
+      metaDescription: (formData.get('metaDescription') as string) || undefined,
     };
 
     // Validate required fields
-    if (!data.title || !data.content) {
+    if (!data.title || !data.sections) {
       return { success: false, error: "Missing required fields" };
     }
 
-    let fileUrl: string | undefined;
+    // Handle file uploads for sections that contain images
+    const processedSections = await Promise.all(
+      data.sections.map(async (section) => {
+        // Deep clone the section to avoid mutating the original
+        const processedSection = { ...section, content: { ...section.content } };
 
-    // Handle file upload if a new file is provided
-    if (data.file) {
-      if (data.file.size > MAX_FILE_SIZE) {
-        return { success: false, error: "File size exceeds 50MB limit" };
-      }
+        // Type guard to check if the section type supports images
+        if (
+          (section.type === 'hero' || section.type === 'banner') &&
+          'image' in section.content &&
+          section.content.image?.startsWith('data:')
+        ) {
+          try {
+            const imageFile = await fetch(section.content.image).then(res => res.blob());
+            const imageUrl = await uploadImageToFirebase(
+              new File([imageFile], `${section.type}-image`, { type: imageFile.type })
+            );
+            // Now TypeScript knows this section type has an image property
+            (processedSection.content as { image: string }).image = imageUrl;
+          } catch (error) {
+            console.error(`Error uploading ${section.type} image:`, error);
+          }
+        }
 
-      fileUrl = await uploadImageToFirebase(data.file);
-      // Update the hero image in the content if applicable
-      if (data.content.hero) {
-        data.content.hero.image = fileUrl; // Update the hero image in the content
-      }
-    }
+        return processedSection;
+      })
+    );
 
-    // Update page
+    // Update page with processed sections
     await prisma.pages.update({
       where: { id },
       data: {
         title: data.title,
-        content: data.content as unknown as Prisma.JsonObject, // Cast to Prisma.JsonObject
+        metaTitle: data.metaTitle,
+        metaDescription: data.metaDescription,
+        sections: {
+          deleteMany: {}, // Remove all existing sections
+          create: processedSections.map((section, index) => ({
+            type: convertToSectionType(section.type),
+            content: section.content as unknown as Prisma.JsonObject,
+            isActive: section.isActive,
+            order: section.order || index,
+          })),
+        },
       },
     });
 

@@ -2,69 +2,116 @@
 
 import { prisma } from "@/lib/prisma";
 import { uploadImageToFirebase } from "@/lib/firebase/firebase";
-import { PageContent } from "@/types/pages";
-import { PageStatus } from "@prisma/client";
-import { Prisma } from "@prisma/client";
+import { PageSection, PageDetails } from "@/types/pages";
+import { PageStatus, Prisma, SectionType } from "@prisma/client";
+import slugify from 'slugify';
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 interface CreatePageData {
   title: string;
-  content: PageContent;
-  file?: File;
+  sections: PageSection[];
+  status?: PageStatus;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
-export async function createPage(formData: FormData): Promise<{ success: boolean; data?: any; error?: string }> {
+// Type conversion helper
+function convertToSectionType(type: string): SectionType {
+  return type.toUpperCase() as SectionType;
+}
+
+export async function createPage(formData: FormData): Promise<{ success: boolean; data?: PageDetails; error?: string }> {
   try {
-    // Handle file upload
-    const file = formData.get('file') as File | null;
-    let fileUrl: string | undefined;
-
-    if (file) {
-      if (file.size > MAX_FILE_SIZE) {
-        return { success: false, error: "File size exceeds 50MB limit" };
-      }
-
-      fileUrl = await uploadImageToFirebase(file);
-    }
-
     // Parse form data
     const data: CreatePageData = {
       title: formData.get('title') as string,
-      content: JSON.parse(formData.get('content') as string) as PageContent,
+      sections: JSON.parse(formData.get('sections') as string) as PageSection[],
+      status: (formData.get('status') as PageStatus) || PageStatus.DRAFT,
+      metaTitle: (formData.get('metaTitle') as string) || undefined,
+      metaDescription: (formData.get('metaDescription') as string) || undefined,
     };
 
-    console.log(data, 'data');
     // Validate required fields
-    if (!data.title || !data.content) {
+    if (!data.title || !data.sections) {
       return { success: false, error: "Missing required fields" };
     }
 
-    // Create page
+    // Generate slug from title
+    const slug = slugify(data.title, { lower: true, strict: true });
+
+    // Handle file uploads for sections that contain images
+    const processedSections = await Promise.all(
+      data.sections.map(async (section) => {
+        // Deep clone the section to avoid mutating the original
+        const processedSection = { ...section, content: { ...section.content } };
+
+        // Type guard to check if the section type supports images
+        if (
+          (section.type === 'hero' || section.type === 'banner') &&
+          'image' in section.content &&
+          section.content.image?.startsWith('data:')
+        ) {
+          try {
+            const imageFile = await fetch(section.content.image).then(res => res.blob());
+            const imageUrl = await uploadImageToFirebase(
+              new File([imageFile], `${section.type}-image`, { type: imageFile.type })
+            );
+            // Now TypeScript knows this section type has an image property
+            (processedSection.content as { image: string }).image = imageUrl;
+          } catch (error) {
+            console.error(`Error uploading ${section.type} image:`, error);
+          }
+        }
+
+        return processedSection;
+      })
+    );
+
+    // Create page with processed sections
     const page = await prisma.pages.create({
       data: {
         title: data.title,
-        content: {
-          ...data.content,
-          // Optionally add the uploaded file URL to the content
-          hero: {
-            ...data.content.hero,
-            image: fileUrl, // Add the image URL to the hero section
-          },
-        } as unknown as Prisma.JsonObject, // Cast to Prisma.JsonObject
-        status: PageStatus.DRAFT, // Default status
+        slug,
+        status: data.status,
+        metaTitle: data.metaTitle,
+        metaDescription: data.metaDescription,
+        sections: {
+          create: processedSections.map((section, index) => ({
+            type: convertToSectionType(section.type),
+            content: section.content as unknown as Prisma.JsonObject,
+            isActive: section.isActive,
+            order: section.order || index
+          }))
+        }
       },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        status: true,
-      },
+      include: {
+        sections: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
     });
 
-    return { success: true, data: page };
+    return { 
+      success: true, 
+      data: {
+        id: page.id,
+        title: page.title,
+        slug: page.slug,
+        status: page.status,
+        metaTitle: page.metaTitle || undefined,
+        metaDescription: page.metaDescription || undefined,
+        sections: page.sections as unknown as PageSection[]
+      }
+    };
+
   } catch (error) {
     console.error("Error creating page:", error);
-    return { success: false, error: "Something went wrong while creating the page" };
+    return { 
+      success: false, 
+      error: "Failed to create page" 
+    };
   }
 } 

@@ -8,12 +8,12 @@ export type CustomerResponse = {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  phone: string | null;
   createdAt: Date;
   updatedAt: Date;
   status: string;
-  totalOrders: number;
+  orderCount: number;
   totalSpent: number;
+  lastOrderDate: Date | null;
 };
 
 export async function getCustomers({
@@ -41,19 +41,15 @@ export async function getCustomers({
     const [customers, count] = await Promise.all([
       prisma.customers.findMany({
         where,
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          phone: true,
-          createdAt: true,
-          updatedAt: true,
-          status: true,
+        include: {
           orders: {
             select: {
               total: true,
+              createdAt: true,
             },
+            orderBy: {
+              createdAt: 'desc'
+            }
           },
         },
         orderBy: { createdAt: "desc" },
@@ -63,10 +59,17 @@ export async function getCustomers({
       prisma.customers.count({ where }),
     ]);
 
-    const formattedCustomers: CustomerResponse[] = customers.map((customer) => ({
-      ...customer,
-      totalOrders: customer.orders.length,
+    const formattedCustomers: CustomerResponse[] = customers.map(customer => ({
+      id: customer.id,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt,
+      status: customer.status,
+      orderCount: customer.orders.length,
       totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
+      lastOrderDate: customer.orders[0]?.createdAt ?? null,
     }));
 
     return {
@@ -80,23 +83,19 @@ export async function getCustomers({
   }
 }
 
-export async function getCustomer(id: string) {
+export async function getCustomer(id: string): Promise<CustomerResponse> {
   try {
     const customer = await prisma.customers.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-        status: true,
+      include: {
         orders: {
           select: {
             total: true,
+            createdAt: true,
           },
+          orderBy: {
+            createdAt: 'desc'
+          }
         },
       },
     });
@@ -106,9 +105,16 @@ export async function getCustomer(id: string) {
     }
 
     return {
-      ...customer,
-      totalOrders: customer.orders.length,
+      id: customer.id,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt,
+      status: customer.status,
+      orderCount: customer.orders.length,
       totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
+      lastOrderDate: customer.orders[0]?.createdAt ?? null,
     };
   } catch (error) {
     console.error("Error getting customer:", error);

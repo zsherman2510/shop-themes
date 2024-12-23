@@ -1,10 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { CustomerResponse } from "../actions/get";
-import { createCustomer, deleteCustomer, updateCustomer } from "../actions";
-import CustomerModal from "./CustomerModal";
+
+// Helper function to format dates
+const formatDate = (date: Date | null) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+// Helper function to format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
 
 interface CustomersTableProps {
   initialData: {
@@ -22,87 +38,40 @@ export default function CustomersTable({
   initialData,
   searchParams,
 }: CustomersTableProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<
-    CustomerResponse | undefined
-  >();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
   const [data, setData] = useState(initialData);
 
-  const handleCreateCustomer = async (formData: any) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      await createCustomer(formData);
-      const updatedData = await fetch(
-        `/admin/customers?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
-      setData(updatedData);
-      setIsModalOpen(false);
-    } catch (error: any) {
-      console.error("Error creating customer:", error);
-      setError(error.message || "Failed to create customer. Please try again.");
-    } finally {
-      setIsLoading(false);
+  const handleSearch = async (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set("search", value);
+    } else {
+      params.delete("search");
     }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleUpdateCustomer = async (formData: any) => {
-    if (!selectedCustomer) return;
-    try {
-      setIsLoading(true);
-      setError(null);
-      await updateCustomer(selectedCustomer.id, formData);
-      const updatedData = await fetch(
-        `/admin/customers?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
-      setData(updatedData);
-      setIsModalOpen(false);
-    } catch (error: any) {
-      console.error("Error updating customer:", error);
-      setError(error.message || "Failed to update customer. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteCustomer = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
-    try {
-      setError(null);
-      await deleteCustomer(id);
-      const updatedData = await fetch(
-        `/admin/customers?${new URLSearchParams(searchParams)}`
-      ).then((res) => res.json());
-      setData(updatedData);
-    } catch (error: any) {
-      console.error("Error deleting customer:", error);
-      setError(error.message || "Failed to delete customer. Please try again.");
-    }
-  };
-
-  const openEditModal = (customer: CustomerResponse) => {
-    setSelectedCustomer(customer);
-    setIsModalOpen(true);
+  const handlePageChange = async (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", page.toString());
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
-    <>
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => {
-            setSelectedCustomer(undefined);
-            setIsModalOpen(true);
-          }}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Customer
-        </button>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1">
+          <input
+            type="text"
+            placeholder="Search customers..."
+            defaultValue={searchParams.search}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="input input-bordered w-full"
+          />
+        </div>
       </div>
-
-      {error && <div className="alert alert-error mb-4">{error}</div>}
 
       <div className="card bg-base-100 shadow-sm">
         <div className="overflow-x-auto">
@@ -111,11 +80,11 @@ export default function CustomersTable({
               <tr>
                 <th className="text-base-content/70">Customer Details</th>
                 <th className="text-base-content/70">Email</th>
-                <th className="text-base-content/70">Phone</th>
                 <th className="text-base-content/70">Orders</th>
                 <th className="text-base-content/70">Total Spent</th>
+                <th className="text-base-content/70">Last Order</th>
                 <th className="text-base-content/70">Status</th>
-                <th className="text-base-content/70">Actions</th>
+                <th className="text-base-content/70">Joined</th>
               </tr>
             </thead>
             <tbody>
@@ -133,13 +102,13 @@ export default function CustomersTable({
                     </td>
                     <td className="text-base-content/70">{customer.email}</td>
                     <td className="text-base-content/70">
-                      {customer.phone || "-"}
+                      {customer.orderCount}
                     </td>
                     <td className="text-base-content/70">
-                      {customer.totalOrders}
+                      {formatCurrency(customer.totalSpent)}
                     </td>
                     <td className="text-base-content/70">
-                      ${customer.totalSpent.toFixed(2)}
+                      {formatDate(customer.lastOrderDate)}
                     </td>
                     <td>
                       <span
@@ -152,21 +121,8 @@ export default function CustomersTable({
                         {customer.status}
                       </span>
                     </td>
-                    <td>
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(customer)}
-                          className="btn btn-ghost btn-sm btn-square"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteCustomer(customer.id)}
-                          className="btn btn-ghost btn-sm btn-square text-error"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </button>
-                      </div>
+                    <td className="text-base-content/70">
+                      {formatDate(customer.createdAt)}
                     </td>
                   </tr>
                 ))
@@ -176,19 +132,31 @@ export default function CustomersTable({
         </div>
       </div>
 
-      <CustomerModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedCustomer(undefined);
-          setError(null);
-        }}
-        onSubmit={
-          selectedCustomer ? handleUpdateCustomer : handleCreateCustomer
-        }
-        customer={selectedCustomer}
-        isLoading={isLoading}
-      />
-    </>
+      {data.pageCount > 1 && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-base-content/60">
+            {data.total} customers total
+          </div>
+          <div className="join">
+            {Array.from({ length: data.pageCount }, (_, i) => i + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  disabled={page === Number(searchParams.page)}
+                  className={`btn btn-sm join-item ${
+                    page === Number(searchParams.page)
+                      ? "btn-active"
+                      : "btn-ghost"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
