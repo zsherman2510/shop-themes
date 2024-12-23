@@ -9,12 +9,17 @@ import Image from "next/image";
 
 interface ProductPageProps {
   params: {
-    slug: string;
+    id: string;
   };
 }
 
+const placeholderImage = "https://placehold.co/600x400";
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProduct(params.slug);
+  // await params
+  const searchParams = await Promise.resolve(params);
+  const product = await getProduct(searchParams.id);
+
+  console.log(product);
 
   if (!product) {
     notFound();
@@ -26,12 +31,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Product Images */}
         <div className="space-y-4">
           <div className="aspect-square relative rounded-lg overflow-hidden bg-muted">
-            <Image
-              src={product.images[0]}
+            <img
+              src={product?.images[0] || placeholderImage}
               alt={product.name}
-              fill
-              className="object-cover"
-              priority
+              className="h-full w-full object-cover object-center group-hover:opacity-75"
             />
           </div>
           {product.images.length > 1 && (
@@ -42,7 +45,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   className="aspect-square relative rounded-lg overflow-hidden bg-muted"
                 >
                   <Image
-                    src={image}
+                    src={image || placeholderImage}
                     alt={`${product.name} ${i + 2}`}
                     fill
                     className="object-cover"

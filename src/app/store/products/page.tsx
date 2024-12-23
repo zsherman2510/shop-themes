@@ -1,8 +1,25 @@
+"use client";
+
 import { getProducts } from "@/app/_actions/store/products";
 import ProductCard from "./components/ProductCard";
+import { useEffect, useState } from "react";
+import { ProductWithPrice } from "@/app/_actions/store/products";
 
-export default async function ProductsPage() {
-  const products = await getProducts();
+export default function ProductsPage() {
+  const [products, setProducts] = useState<ProductWithPrice[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const data = await getProducts();
+      setProducts(data);
+    };
+    loadProducts();
+  }, []);
+
+  const handleAddToCart = (product: ProductWithPrice) => {
+    console.log("Adding to cart:", product);
+    // TODO: Implement cart functionality
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -12,7 +29,12 @@ export default async function ProductsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            showCartButton
+            onAddToCart={() => handleAddToCart(product)}
+          />
         ))}
       </div>
     </div>

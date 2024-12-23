@@ -5,13 +5,24 @@ export default async function CategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-base-100">
-      <h1 className="text-3xl font-bold mb-8 text-base-content">Categories</h1>
+    <div className="bg-base-100">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="py-16 sm:py-24">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl font-bold tracking-tight text-base-content sm:text-5xl">
+              Shop by Category
+            </h1>
+            <p className="mt-4 text-lg text-base-content/70">
+              Browse our curated collection of digital assets and themes
+            </p>
+          </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <CategoryCard key={category.id} category={category} />
-        ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categories.map((category) => (
+              <CategoryCard key={category.id} category={category} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
