@@ -1,48 +1,53 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { PageContent, PageDetails } from "@/types/pages";
-import { PageStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { PageContent } from "@/types/pages";
+import { uploadImageToFirebase } from "@/lib/firebase/firebase"; // Import the upload function
 import { Prisma } from "@prisma/client";
-export async function updatePage({
-  id,
-  title,
-  content,
-  status,
-}: {
-  id: string;
-  title: string;
-  content: PageContent;
-  status: PageStatus;
-}): Promise<PageDetails> {
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+
+export async function updatePage(formData: FormData, id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const updatedPage = await prisma.page.update({
+    // Parse form data
+    const data = {
+      title: formData.get('title') as string,
+      content: JSON.parse(formData.get('content') as string) as PageContent,
+      file: formData.get('file') as File | null, // Get the file from form data
+    };
+
+    // Validate required fields
+    if (!data.title || !data.content) {
+      return { success: false, error: "Missing required fields" };
+    }
+
+    let fileUrl: string | undefined;
+
+    // Handle file upload if a new file is provided
+    if (data.file) {
+      if (data.file.size > MAX_FILE_SIZE) {
+        return { success: false, error: "File size exceeds 50MB limit" };
+      }
+
+      fileUrl = await uploadImageToFirebase(data.file);
+      // Update the hero image in the content if applicable
+      if (data.content.hero) {
+        data.content.hero.image = fileUrl; // Update the hero image in the content
+      }
+    }
+
+    // Update page
+    await prisma.pages.update({
       where: { id },
       data: {
-        title,
-        content: content as unknown as Prisma.JsonObject,
-        status,
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        status: true,
+        title: data.title,
+        content: data.content as unknown as Prisma.JsonObject, // Cast to Prisma.JsonObject
       },
     });
 
-    revalidatePath("/admin/pages");
-    revalidatePath(`/admin/pages/${id}`);
-
-    return {
-      id: updatedPage.id,
-      title: updatedPage.title,
-      content: updatedPage.content as unknown as PageContent,
-      status: updatedPage.status,
-    };
+    return { success: true };
   } catch (error) {
     console.error("Error updating page:", error);
-    throw new Error("Failed to update page");
+    return { success: false, error: "Something went wrong while updating the page" };
   }
 } 

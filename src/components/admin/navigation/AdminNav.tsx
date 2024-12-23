@@ -67,11 +67,11 @@ const AdminNav = () => {
       href: "/admin/customers",
       icon: Users,
     },
-    // {
-    //   title: "Pages",
-    //   href: "/admin/pages",
-    //   icon: FileText,
-    // },
+    {
+      title: "Pages",
+      href: "/admin/pages",
+      icon: FileText,
+    },
     {
       title: "Settings",
       href: "/admin/settings",

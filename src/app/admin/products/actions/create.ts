@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { ProductResponse } from "./get";
-import { uploadToFirebase } from "@/lib/firebase/firebase";
+import { uploadZipToFirebase } from "@/lib/firebase/firebase";
 import { ProductType } from "@prisma/client";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
@@ -54,7 +54,7 @@ export async function createProduct(formData: FormData): Promise<CreateProductRe
       };
     }
 
-    fileUrl = await uploadToFirebase(file);
+    fileUrl = await uploadZipToFirebase(file);
 
     // Parse form data
     const data: CreateProductData = {

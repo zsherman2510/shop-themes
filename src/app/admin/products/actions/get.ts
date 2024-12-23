@@ -25,7 +25,6 @@ export type ProductResponse = {
   version: string | null;
   features: string[];
   documentation: string | null;
-  changelog: any | null;
   requirements: any | null;
 };
 
@@ -80,7 +79,7 @@ export async function getProducts({
           version: true,
           features: true,
           documentation: true,
-          changelog: true,
+          // changelog: true,
           requirements: true,
         },
         orderBy: { createdAt: "desc" },
@@ -136,7 +135,7 @@ export async function getAdminProduct(id: string) {
         version: true,
         features: true,
         documentation: true,
-        changelog: true,
+        // changelog: true,
         requirements: true,
       },
     });

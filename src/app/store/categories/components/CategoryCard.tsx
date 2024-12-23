@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Category } from "@/app/_actions/store/categories";
+import PlaceholderImage from "@/components/ui/placeholderImage";
 
 interface CategoryCardProps {
   category: Category;
@@ -9,7 +10,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link href={`/categories/${category.slug}`}>
       <div className="group relative overflow-hidden rounded-lg">
-        {category.image && (
+        {category.image ? (
           <div className="aspect-square w-full">
             <img
               src={category.image}
@@ -17,6 +18,8 @@ export default function CategoryCard({ category }: CategoryCardProps) {
               className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
             />
           </div>
+        ) : (
+          <PlaceholderImage className="h-full w-full" />
         )}
 
         <div className="absolute inset-0 bg-black/40 flex items-end p-6">

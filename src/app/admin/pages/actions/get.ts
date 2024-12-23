@@ -19,7 +19,6 @@ export async function getPages({
     const skip = (page - 1) * limit;
 
     const where: Prisma.PagesWhereInput = {
-      isSystem: true,
       ...(search && {
         title: { contains: search, mode: "insensitive" as Prisma.QueryMode },
       }),
@@ -35,26 +34,30 @@ export async function getPages({
         select: {
           id: true,
           title: true,
-          slug: true,
           status: true,
           updatedAt: true,
+          content: true,
         },
       }),
       prisma.pages.count({ where }),
     ]);
 
     return {
-      pages,
+      pages: pages || [],
       total: count,
       pageCount: Math.ceil(count / limit),
     };
   } catch (error) {
     console.error("Error getting pages:", error);
-    throw new Error("Failed to get pages");
+    return {
+      pages: [],
+      total: 0,
+      pageCount: 0,
+    };
   }
 }
 
-export async function getPage(id: string): Promise<PageDetails> {
+export async function getPage(id: string): Promise<PageDetails | null> {
   try {
     const page = await prisma.pages.findUnique({
       where: { id },
@@ -77,7 +80,7 @@ export async function getPage(id: string): Promise<PageDetails> {
     });
 
     if (!page) {
-      throw new Error("Page not found");
+      return null;
     }
 
     return {
@@ -88,95 +91,28 @@ export async function getPage(id: string): Promise<PageDetails> {
     };
   } catch (error) {
     console.error("Error getting page:", error);
-    throw error;
+    return null;
   }
 }
 
 export async function initializeHomePage() {
   try {
-    // Check if home page exists
-    const homePage = await prisma.pages.findFirst({
-      where: {
-        slug: "home",
-        isSystem: true,
+    // Retrieve all pages
+    const allPages = await prisma.pages.findMany({
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        content: true,
+        updatedAt: true,
       },
     });
 
-    // If home page doesn't exist, create it
-    if (!homePage) {
-      await prisma.pages.create({
-        data: {
-          title: "Home",
-          slug: "home",
-          status: "PUBLISHED",
-          isSystem: true,
-          content: {
-            hero: {
-              title: "Welcome to Our Store",
-              description: "Discover our amazing products",
-              cta: "Shop Now",
-              image: "/images/hero.jpg",
-            },
-            featuredProducts: {
-              title: "Featured Products",
-              products: [],
-            },
-            categories: {
-              title: "Shop by Category",
-              categories: [],
-            },
-            newsletter: {
-              title: "Subscribe to Our Newsletter",
-              description: "Stay updated with our latest products and offers",
-            },
-          },
-          sections: {
-            create: [
-              {
-                type: "HERO",
-                content: {
-                  title: "Welcome to Our Store",
-                  description: "Discover our amazing products",
-                  cta: "Shop Now",
-                  image: "/images/hero.jpg",
-                },
-                order: 1,
-                isActive: true,
-              },
-              {
-                type: "FEATURED_PRODUCTS",
-                content: {
-                  title: "Featured Products",
-                  products: [],
-                },
-                order: 2,
-                isActive: true,
-              },
-              {
-                type: "CATEGORY_SHOWCASE",
-                content: {
-                  title: "Shop by Category",
-                  categories: [],
-                },
-                order: 3,
-                isActive: true,
-              },
-              {
-                type: "NEWSLETTER",
-                content: {
-                  title: "Subscribe to Our Newsletter",
-                  description: "Stay updated with our latest products and offers",
-                },
-                order: 4,
-                isActive: true,
-              },
-            ],
-          },
-        },
-      });
-    }
+    console.log("All pages retrieved:", allPages); // Log the retrieved pages for debugging
+
+    return allPages; // Return the list of all pages
   } catch (error) {
-    console.error("Error initializing home page:", error);
-    throw new Error("Failed to initialize home page");
+    console.error("Error retrieving pages:", error);
+    throw new Error("Failed to retrieve pages");
   }
 } 

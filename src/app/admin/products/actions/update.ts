@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { ProductResponse } from "./get";
+import { uploadImageToFirebase } from "@/lib/firebase/firebase"; // Import your upload function
+import { deleteImageFromFirebase } from "@/lib/firebase/firebase"; // Import the delete function
 
 export async function updateProduct(id: string, formData: FormData) {
   try {
@@ -11,9 +13,8 @@ export async function updateProduct(id: string, formData: FormData) {
       description: formData.get("description") as string,
       sku: formData.get("sku") as string,
       price: parseFloat(formData.get("price") as string),
-      categoryId: formData.get("categoryId") as string || null, // Handle empty string
+      categoryId: formData.get("categoryId") as string || null,
       isActive: formData.get("isActive") === "true",
-      previewUrl: formData.get("previewUrl") as string,
       version: formData.get("version") as string,
       features: JSON.parse(formData.get("features") as string),
       documentation: formData.get("documentation") as string,
@@ -33,12 +34,29 @@ export async function updateProduct(id: string, formData: FormData) {
       }
     }
 
+    // Handle images
+    const newImages: string[] = [];
+    const oldImages: string[] = JSON.parse(formData.get("oldImages") as string) || []; // Get old images from form data
+    const imagesToDelete: string[] = JSON.parse(formData.get("imagesToDelete") as string) || []; // Get images marked for deletion
+
+    // Process new images
+    const imageFiles = formData.getAll("images") as File[]; // Assuming images are sent as 'images' field
+    for (const file of imageFiles) {
+      if (file instanceof File) {
+        const imageUrl = await uploadImageToFirebase(file); // Upload new image
+        newImages.push(imageUrl);
+      }
+    }
+
     // Update product
     const product = await prisma.products.update({
       where: { id },
       data: {
         ...data,
-        categoryId: data.categoryId || null, // Ensure null if empty string
+        categoryId: data.categoryId || null,
+        images: {
+          set: oldImages.concat(newImages), // Combine old and new images
+        },
       },
       include: {
         category: {
@@ -49,6 +67,11 @@ export async function updateProduct(id: string, formData: FormData) {
         },
       },
     });
+
+    // Delete old images from storage
+    for (const image of imagesToDelete) {
+      await deleteImageFromFirebase(image); // Delete the image from storage
+    }
 
     return {
       success: true,

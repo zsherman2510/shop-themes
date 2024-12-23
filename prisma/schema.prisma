@@ -216,30 +216,17 @@ model Themes {
 }
 
 model Pages {
-  id               String         @id @default(cuid())
-  title            String
-  slug             String         @unique
-  content          Json
-  status           PageStatus     @default(DRAFT)
-  layout           PageLayout     @default(FULL_WIDTH)
-  isSystem         Boolean        @default(false)
-  templateId       String?
-  metaTitle        String?
-  metaDescription  String?
-  ogImage          String?
-  showInNavigation Boolean        @default(true)
-  navigationLabel  String?
-  navigationOrder  Int?
-  visibility       PageVisibility @default(PUBLIC)
-  publishedAt      DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  parentId         String?
-  parent           Pages?         @relation("PageHierarchy", fields: [parentId], references: [id])
-  children         Pages[]        @relation("PageHierarchy")
-  template         Templates?     @relation(fields: [templateId], references: [id])
-  sections         Sections[]
-  permissions      Permissions[]  @relation("PageToPermission")
+  id          String        @id @default(cuid())
+  title       String
+  content     Json
+  status      PageStatus    @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  parentId    String?
+  parent      Pages?        @relation("PageHierarchy", fields: [parentId], references: [id])
+  children    Pages[]       @relation("PageHierarchy")
+  sections    Sections[]
+  permissions Permissions[] @relation("PageToPermission")
 }
 
 model Sections {
@@ -331,7 +318,6 @@ model Templates {
   settings    Json?
   thumbnail   String?
   type        PageType
-  pages       Pages[]
 }
 
 model ShippingZones {

@@ -20,6 +20,7 @@ export default function ProductForm({
   categories,
 }: ProductFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [images, setImages] = useState<string[]>(defaultValues?.images || []);
 
   const {
     register,
@@ -81,10 +82,19 @@ Need help? Contact support@premiumtheme.com`,
 
     // Append file if selected
     if (selectedFile) {
-      formData.append("file", selectedFile);
+      formData.append("images", selectedFile);
     }
 
+    // Append existing images to the form data
+    images.forEach((image) => {
+      formData.append("oldImages", image);
+    });
+
     await onSubmit(formData);
+  };
+
+  const handleRemoveImage = (image: string) => {
+    setImages(images.filter((img) => img !== image));
   };
 
   return (
@@ -263,6 +273,30 @@ Need help? Contact support@premiumtheme.com`,
             className="checkbox"
           />
         </label>
+      </div>
+
+      <div className="form-control w-full">
+        <label className="label">
+          <span className="label-text">Current Images</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {images.map((image) => (
+            <div key={image} className="relative">
+              <img
+                src={image}
+                alt="Product"
+                className="w-20 h-20 object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(image)}
+                className="absolute top-0 right-0 btn btn-sm btn-error"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex justify-end">

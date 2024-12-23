@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { getProducts } from "../actions/get";
 import { Category } from "@/app/_actions/store/categories";
+import PlaceholderImage from "@/components/ui/placeholderImage";
 
 interface ProductsTableProps {
   initialData: {
@@ -169,9 +170,9 @@ export default function ProductsTable({
                   >
                     <td>
                       <div className="flex items-center gap-3">
-                        {product.images[0] && (
-                          <div className="avatar">
-                            <div className="mask mask-squircle w-10 h-10">
+                        <div className="avatar">
+                          <div className="mask mask-squircle w-10 h-10">
+                            {product.images[0] ? (
                               <Image
                                 src={product.images[0]}
                                 alt={product.name}
@@ -179,9 +180,11 @@ export default function ProductsTable({
                                 height={40}
                                 className="object-cover"
                               />
-                            </div>
+                            ) : (
+                              <PlaceholderImage className="w-full h-full" />
+                            )}
                           </div>
-                        )}
+                        </div>
                         <div>
                           <div className="font-medium hover:text-primary">
                             {product.name}
