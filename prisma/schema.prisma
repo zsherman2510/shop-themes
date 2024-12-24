@@ -117,7 +117,7 @@ model Orders {
   id                String        @id @default(cuid())
   orderNumber       String        @unique
   status            OrderStatus   @default(PENDING)
-  total             Decimal
+  total             Decimal       @db.Decimal(10, 2)
   shippingAddressId String?
   billingAddressId  String?
   paymentIntent     String?

@@ -2,12 +2,18 @@
 
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "./cart-provider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartSheet from "./cart-sheet";
 
 export default function CartIcon() {
   const { itemCount } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenCart = () => setIsCartOpen(true);
+    window.addEventListener("openCart", handleOpenCart);
+    return () => window.removeEventListener("openCart", handleOpenCart);
+  }, []);
 
   return (
     <>

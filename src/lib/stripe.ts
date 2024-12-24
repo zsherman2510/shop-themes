@@ -44,6 +44,14 @@ export const createCheckout = async ({
       }
     }
 
+    // Prepare metadata with essential item information
+    const itemsForMetadata = items.map(item => ({
+      id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      name: item.name,
+    }));
+
     const session = await stripe.checkout.sessions.create({
       mode,
       payment_method_types: ["card"],
@@ -61,6 +69,9 @@ export const createCheckout = async ({
       })),
       success_url: successUrl,
       cancel_url: cancelUrl,
+      metadata: {
+        items: JSON.stringify(itemsForMetadata),
+      },
       ...extraParams,
     });
 

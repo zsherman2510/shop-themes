@@ -21,6 +21,9 @@ export default function ProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     addItem(product);
+    // Dispatch event to open cart
+    const event = new CustomEvent("openCart");
+    window.dispatchEvent(event);
   };
 
   return (

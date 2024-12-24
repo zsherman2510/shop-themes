@@ -3,15 +3,19 @@
 import { CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/components/store/cart/cart-provider";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function SuccessPage() {
   const { clearCart } = useCart();
+  const hasCleared = useRef(false);
 
-  // Clear the cart when the success page loads
+  // Clear the cart only once when the success page loads
   useEffect(() => {
-    clearCart();
-  }, [clearCart]);
+    if (!hasCleared.current) {
+      clearCart();
+      hasCleared.current = true;
+    }
+  }, []); // Empty dependency array
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
@@ -32,7 +36,7 @@ export default function SuccessPage() {
         </div>
 
         <div className="space-y-4">
-          <Link href="/store" className="btn btn-primary w-full">
+          <Link href="/" className="btn btn-primary w-full">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Link>
