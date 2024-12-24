@@ -12,16 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "react-hot-toast";
-import { createCategory, updateCategory } from "../actions/categories";
-import { useRouter } from "next/navigation";
 
 interface CategoryModalProps {
   category?: Category;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (formData: any) => Promise<void>;
-  isLoading: boolean;
 }
 
 export default function CategoryModal({
@@ -29,10 +25,7 @@ export default function CategoryModal({
   isOpen,
   onClose,
   onSubmit,
-  isLoading: externalLoading,
 }: CategoryModalProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,7 +53,12 @@ export default function CategoryModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    try {
+      await onSubmit(formData);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   const generateSlug = (name: string) => {
@@ -93,7 +91,6 @@ export default function CategoryModal({
                 });
               }}
               placeholder="Category name"
-              disabled={isLoading}
             />
           </div>
 
@@ -106,7 +103,6 @@ export default function CategoryModal({
                 setFormData({ ...formData, slug: generateSlug(e.target.value) })
               }
               placeholder="category-slug"
-              disabled={isLoading}
             />
           </div>
 
@@ -119,7 +115,6 @@ export default function CategoryModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="Category description"
-              disabled={isLoading}
             />
           </div>
 
@@ -132,25 +127,15 @@ export default function CategoryModal({
                 setFormData({ ...formData, image: e.target.value })
               }
               placeholder="https://example.com/image.jpg"
-              disabled={isLoading}
             />
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading
-                ? "Loading..."
-                : category
-                  ? "Update Category"
-                  : "Create Category"}
+            <Button type="submit">
+              {category ? "Update Category" : "Create Category"}
             </Button>
           </div>
         </form>

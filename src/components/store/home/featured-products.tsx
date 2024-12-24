@@ -1,6 +1,5 @@
 "use client";
 
-import { Products } from "@prisma/client";
 import ProductCard from "@/app/store/products/components/ProductCard";
 import { ProductWithPrice } from "@/app/_actions/store/products";
 
@@ -9,11 +8,6 @@ interface FeaturedProductsProps {
 }
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
-  const handleAddToCart = (product: ProductWithPrice) => {
-    console.log("Adding to cart:", product);
-    // TODO: Implement cart functionality
-  };
-
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,11 +22,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
           {products.map((product) => (
             <div key={product.id}>
-              <ProductCard
-                product={product}
-                onAddToCart={() => handleAddToCart(product)}
-                showCartButton
-              />
+              <ProductCard product={product} showCartButton />
             </div>
           ))}
         </div>

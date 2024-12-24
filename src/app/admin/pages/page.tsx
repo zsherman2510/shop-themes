@@ -1,10 +1,13 @@
 import { getPages, initializeHomePage } from "./actions/get";
 import PageTable from "./components/PageTable";
 import { Metadata } from "next";
-import { PageStatus } from "@prisma/client";
 
 // Type for search params
-type SearchParams = { [key: string]: string | string[] | undefined };
+type SearchParams = Promise<{
+  search: string;
+  status: string;
+  page: string;
+}>;
 
 // Page props interface
 interface PageProps {
@@ -21,17 +24,14 @@ export default async function PagesPage({ searchParams }: PageProps) {
   // Initialize home page if it doesn't exist
   await initializeHomePage();
 
-  const params = await Promise.resolve(searchParams);
-  // Parse search params safely
-  const search = typeof params.search === "string" ? params.search : "";
-  const status = typeof params.status === "string" ? params.status : undefined;
-  const page = typeof params.page === "string" ? Number(params.page) : 1;
+  // Await and parse search params
+  const { search, status, page } = await searchParams;
 
   // Fetch data server-side
   const pagesData = await getPages({
     search,
     status,
-    page,
+    page: Number(page),
     limit: 10,
   });
 

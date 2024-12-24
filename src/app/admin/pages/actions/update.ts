@@ -5,8 +5,6 @@ import { PageSection } from "@/types/pages";
 import { uploadImageToFirebase } from "@/lib/firebase/firebase";
 import { Prisma, SectionType } from "@prisma/client";
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-
 interface UpdatePageData {
   title: string;
   sections: PageSection[];

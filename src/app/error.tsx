@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 
 export default function Error({
@@ -27,9 +28,9 @@ export default function Error({
             <button onClick={() => reset()} className="btn btn-primary">
               Try again
             </button>
-            <a href="/" className="btn btn-ghost">
+            <Link href="/" className="btn btn-ghost">
               Return Home
-            </a>
+            </Link>
           </div>
           {process.env.NODE_ENV === "development" && (
             <div className="mt-4 p-4 bg-error/10 rounded-box text-left">

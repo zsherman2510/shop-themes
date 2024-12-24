@@ -46,6 +46,7 @@ export default function CheckoutForm({ onSuccess }: CheckoutFormProps) {
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
+      console.error(err);
     } finally {
       setIsProcessing(false);
     }

@@ -1,19 +1,51 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma, OrderStatus } from "@prisma/client";
+import { Prisma, OrderStatus, PaymentStatus } from "@prisma/client";
 
 export type OrderResponse = {
   id: string;
   orderNumber: string;
   customer: {
+    id: string;
     firstName: string | null;
     lastName: string | null;
     email: string;
   } | null;
+  guestName: string | null;
+  guestEmail: string | null;
   status: OrderStatus;
   total: number;
-  paymentStatus: string;
+  paymentStatus: PaymentStatus;
+  items: {
+    id: string;
+    quantity: number;
+    price: number;
+    product: {
+      id: string;
+      name: string;
+      sku: string;
+      images: string[];
+    };
+  }[];
+  shippingAddress: {
+    id: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  } | null;
+  billingAddress: {
+    id: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -79,7 +111,7 @@ export async function getOrders({
     const formattedOrders: OrderResponse[] = orders.map((order) => ({
       ...order,
       total: Number(order.total),
-    }));
+    })) as OrderResponse[];
 
     return {
       orders: formattedOrders,
@@ -101,11 +133,14 @@ export async function getOrder(id: string) {
         orderNumber: true,
         customer: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             email: true,
           },
         },
+        guestName: true,
+        guestEmail: true,
         status: true,
         total: true,
         paymentStatus: true,
@@ -119,6 +154,7 @@ export async function getOrder(id: string) {
                 id: true,
                 name: true,
                 sku: true,
+                images: true,
               },
             },
           },
@@ -141,7 +177,7 @@ export async function getOrder(id: string) {
         ...item,
         price: Number(item.price),
       })),
-    };
+    } as OrderResponse;
   } catch (error) {
     console.error("Error getting order:", error);
     throw error;

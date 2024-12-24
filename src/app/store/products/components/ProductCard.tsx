@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductWithPrice } from "@/app/_actions/store/products";
+import { useCart } from "@/components/store/cart/cart-provider";
 
 const PLACEHOLDER_IMAGE =
   "https://placehold.co/600x400/FAFAFA/A3A3A3?text=Product+Image";
@@ -7,14 +8,19 @@ const PLACEHOLDER_IMAGE =
 interface ProductCardProps {
   product: ProductWithPrice;
   showCartButton?: boolean;
-  onAddToCart?: () => void;
 }
 
 export default function ProductCard({
   product,
   showCartButton,
-  onAddToCart,
 }: ProductCardProps) {
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addItem(product);
+  };
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl bg-base-100 transition-all duration-300">
       <Link href={`/store/products/${product.id}`} className="flex-1">
@@ -42,13 +48,10 @@ export default function ProductCard({
           </div>
         </div>
       </Link>
-      {showCartButton && onAddToCart && (
+      {showCartButton && (
         <div className="p-4 pt-0">
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              onAddToCart();
-            }}
+            onClick={handleAddToCart}
             className="btn btn-primary w-full gap-2 group-hover:scale-105 transition-transform"
           >
             <svg

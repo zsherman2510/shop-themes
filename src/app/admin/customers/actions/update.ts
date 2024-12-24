@@ -49,8 +49,13 @@ export async function updateCustomer(
 
     return {
       ...customer,
-      totalOrders: customer.orders.length,
-      totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
+      orders: customer.orders.map(order => ({
+        ...order,
+        total: Number(order.total)
+      })),
+      orderCount: 0,
+      totalSpent: 0,
+      lastOrderDate: null,
     } as CustomerResponse;
   } catch (error) {
     console.error("Error updating customer:", error);

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { CustomerResponse } from "../actions/get";
 
@@ -40,7 +39,6 @@ export default function CustomersTable({
 }: CustomersTableProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [data, setData] = useState(initialData);
 
   const handleSearch = async (value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -88,14 +86,14 @@ export default function CustomersTable({
               </tr>
             </thead>
             <tbody>
-              {data.customers.length === 0 ? (
+              {initialData.customers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center text-base-content/70">
                     No customers found.
                   </td>
                 </tr>
               ) : (
-                data.customers.map((customer) => (
+                initialData.customers.map((customer) => (
                   <tr key={customer.id} className="hover">
                     <td className="font-medium">
                       {customer.firstName} {customer.lastName}
@@ -132,13 +130,13 @@ export default function CustomersTable({
         </div>
       </div>
 
-      {data.pageCount > 1 && (
+      {initialData.pageCount > 1 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-base-content/60">
-            {data.total} customers total
+            {initialData.total} customers total
           </div>
           <div className="join">
-            {Array.from({ length: data.pageCount }, (_, i) => i + 1).map(
+            {Array.from({ length: initialData.pageCount }, (_, i) => i + 1).map(
               (page) => (
                 <button
                   key={page}

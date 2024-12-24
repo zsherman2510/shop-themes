@@ -11,7 +11,6 @@ import {
   X,
   ChevronRight,
   LayoutDashboard,
-  FileText,
   List,
 } from "lucide-react";
 import { useState, useEffect } from "react";

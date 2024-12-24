@@ -7,17 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Eye, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 
+type tParams = Promise<{ id: string }>;
 interface ProductPageProps {
-  params: {
-    id: string;
-  };
+  params: tParams;
 }
 
 const placeholderImage = "https://placehold.co/600x400";
 export default async function ProductPage({ params }: ProductPageProps) {
   // await params
-  const searchParams = await Promise.resolve(params);
-  const product = await getProduct(searchParams.id);
+  const { id } = await params;
+  const product = await getProduct(id);
 
   console.log(product);
 
@@ -108,7 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Optional: Add purchase benefits */}
             <Card className="p-4 bg-muted/50">
-              <h3 className="font-semibold mb-2">What's included:</h3>
+              <h3 className="font-semibold mb-2">What&apos;s included:</h3>
               <ul className="space-y-2 text-sm">
                 <li>✓ Full source code</li>
                 <li>✓ Lifetime updates</li>

@@ -6,8 +6,6 @@ import { PageSection, PageDetails } from "@/types/pages";
 import { PageStatus, Prisma, SectionType } from "@prisma/client";
 import slugify from 'slugify';
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-
 interface CreatePageData {
   title: string;
   sections: PageSection[];

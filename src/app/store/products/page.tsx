@@ -16,11 +16,6 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const handleAddToCart = (product: ProductWithPrice) => {
-    console.log("Adding to cart:", product);
-    // TODO: Implement cart functionality
-  };
-
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold mb-8 text-base-content">
@@ -29,12 +24,7 @@ export default function ProductsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            showCartButton
-            onAddToCart={() => handleAddToCart(product)}
-          />
+          <ProductCard key={product.id} product={product} showCartButton />
         ))}
       </div>
     </div>

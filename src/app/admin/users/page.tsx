@@ -1,8 +1,13 @@
+import { UserRole } from "@prisma/client";
 import { getUsers } from "./actions/get";
 import UserTable from "./components/UserTable";
 
 // Type for search params
-type SearchParams = { [key: string]: string | string[] | undefined };
+type SearchParams = Promise<{
+  search: string;
+  role: string;
+  page: string;
+}>;
 
 // Page props interface
 interface PageProps {
@@ -10,17 +15,14 @@ interface PageProps {
 }
 
 export default async function UsersPage({ searchParams }: PageProps) {
-  // Parse search params safely
-  const params = await Promise.resolve(searchParams);
-  const search = typeof params.search === "string" ? params.search : "";
-  const role = typeof params.role === "string" ? params.role : undefined;
-  const page = typeof params.page === "string" ? Number(params.page) : 1;
+  // Await and parse search params
+  const { search, role, page } = await searchParams;
 
   // Fetch data server-side
   const usersData = await getUsers({
     search,
-    role,
-    page,
+    role: role as UserRole | undefined,
+    page: Number(page),
     limit: 10,
   });
 
@@ -37,7 +39,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
         initialData={usersData}
         searchParams={{
           search,
-          role,
+          role: role as UserRole | undefined,
           page: String(page),
         }}
       />

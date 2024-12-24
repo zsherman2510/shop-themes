@@ -5,7 +5,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import CheckoutModal from "../checkout/checkout-modal";
+import { toast } from "react-hot-toast";
 
 interface CartSheetProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ interface CartSheetProps {
 
 export default function CartSheet({ isOpen, onClose }: CartSheetProps) {
   const { items, removeItem, updateQuantity, total } = useCart();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -27,6 +27,41 @@ export default function CartSheet({ isOpen, onClose }: CartSheetProps) {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  const handleCheckout = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+          successUrl: `${window.location.origin}/success`,
+          cancelUrl: window.location.href,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error creating checkout session");
+      }
+
+      if (!data.url) {
+        throw new Error("No checkout URL returned");
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Error creating checkout session");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -81,10 +116,10 @@ export default function CartSheet({ isOpen, onClose }: CartSheetProps) {
                       className="group flex gap-3 bg-base-200/50 p-3 rounded-lg hover:bg-base-200 
                                transition-all duration-200 hover:shadow-md"
                     >
-                      {item.image && (
+                      {item.images[0] && (
                         <div className="w-16 h-16 relative rounded-md overflow-hidden bg-base-300 flex-shrink-0">
                           <Image
-                            src={item.image}
+                            src={item.images[0]}
                             alt={item.name}
                             fill
                             className="object-cover transition-transform group-hover:scale-105"
@@ -152,23 +187,20 @@ export default function CartSheet({ isOpen, onClose }: CartSheetProps) {
                 </p>
                 <button
                   className="btn btn-primary w-full hover:scale-[1.02] active:scale-[0.98] transition-transform"
-                  onClick={() => setIsCheckoutOpen(true)}
+                  onClick={handleCheckout}
+                  disabled={isLoading}
                 >
-                  Checkout
+                  {isLoading ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : (
+                    "Checkout"
+                  )}
                 </button>
               </div>
             </>
           )}
         </div>
       </div>
-
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => {
-          setIsCheckoutOpen(false);
-          onClose();
-        }}
-      />
     </>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 export default function Newsletter() {
   return (
     <section className="bg-base-200">

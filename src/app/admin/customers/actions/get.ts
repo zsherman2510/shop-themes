@@ -1,19 +1,26 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, OrderStatus } from "@prisma/client";
 
 export type CustomerResponse = {
   id: string;
   email: string;
   firstName: string | null;
   lastName: string | null;
+  phone: string | null;
   createdAt: Date;
   updatedAt: Date;
   status: string;
   orderCount: number;
   totalSpent: number;
   lastOrderDate: Date | null;
+  orders?: {
+    id: string;
+    total: number;
+    status: OrderStatus;
+    createdAt: Date;
+  }[];
 };
 
 export async function getCustomers({
@@ -66,6 +73,7 @@ export async function getCustomers({
       lastName: customer.lastName,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
+      phone: customer.phone,
       status: customer.status,
       orderCount: customer.orders.length,
       totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
@@ -90,7 +98,9 @@ export async function getCustomer(id: string): Promise<CustomerResponse> {
       include: {
         orders: {
           select: {
+            id: true,
             total: true,
+            status: true,
             createdAt: true,
           },
           orderBy: {
@@ -109,12 +119,19 @@ export async function getCustomer(id: string): Promise<CustomerResponse> {
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
+      phone: customer.phone,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       status: customer.status,
       orderCount: customer.orders.length,
-      totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
+      totalSpent: customer.orders.reduce((sum, order) => sum + Number(order.total), 0),
       lastOrderDate: customer.orders[0]?.createdAt ?? null,
+      orders: customer.orders.map(order => ({
+        id: order.id,
+        total: Number(order.total),
+        status: order.status,
+        createdAt: order.createdAt,
+      })),
     };
   } catch (error) {
     console.error("Error getting customer:", error);

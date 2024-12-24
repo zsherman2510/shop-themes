@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Products, Prisma } from "@prisma/client";
+import { Products } from "@prisma/client";
 
 export type ProductWithPrice = Omit<Products, 'price'> & {
   price: number;

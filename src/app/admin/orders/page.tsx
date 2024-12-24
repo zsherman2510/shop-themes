@@ -3,7 +3,11 @@ import { getOrders } from "./actions/get";
 import OrdersTable from "./components/OrderTable";
 
 // Type for search params
-type SearchParams = { [key: string]: string | string[] | undefined };
+type SearchParams = Promise<{
+  search: string;
+  status: string;
+  page: string;
+}>;
 
 // Page props interface
 interface PageProps {
@@ -12,18 +16,13 @@ interface PageProps {
 
 export default async function OrdersPage({ searchParams }: PageProps) {
   // Await and parse search params
-  const params = await Promise.resolve(searchParams);
-
-  // Parse search params safely
-  const search = typeof params.search === "string" ? params.search : "";
-  const status = typeof params.status === "string" ? params.status : undefined;
-  const page = typeof params.page === "string" ? Number(params.page) : 1;
+  const { search, status, page } = await searchParams;
 
   // Fetch data server-side
   const ordersData = await getOrders({
     search,
     status: status as OrderStatus | undefined,
-    page,
+    page: Number(page),
     limit: 10,
   });
 

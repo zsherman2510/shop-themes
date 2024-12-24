@@ -31,7 +31,6 @@ export async function createProduct(formData: FormData): Promise<CreateProductRe
   try {
     // Handle file upload
     const file = formData.get('file') as File | null;
-    let fileUrl: string | undefined;
 
     if (!file) {
       return {
@@ -54,7 +53,7 @@ export async function createProduct(formData: FormData): Promise<CreateProductRe
       };
     }
 
-    fileUrl = await uploadZipToFirebase(file);
+    const fileUrl = await uploadZipToFirebase(file);
 
     // Parse form data
     const data: CreateProductData = {
@@ -133,7 +132,6 @@ export async function createProduct(formData: FormData): Promise<CreateProductRe
         price: Number(product.price),
         images: [],
         inventory: 0,
-        changelog: null,
         requirements: null,
       },
     };

@@ -3,14 +3,15 @@ import { getProductsByCategory } from "@/app/_actions/store/products";
 import ProductCard from "@/app/store/products/components/ProductCard";
 import { notFound } from "next/navigation";
 
+type tParams = Promise<{ id: string }>;
+
 interface CategoryPageProps {
-  params: {
-    id: string;
-  };
+  params: tParams;
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const category = await getCategory(params.id);
+  const { id } = await params;
+  const category = await getCategory(id);
 
   if (!category) {
     notFound();

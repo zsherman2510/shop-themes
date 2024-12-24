@@ -34,7 +34,10 @@ export async function createCustomer(data: {
         status: true,
         orders: {
           select: {
+            id: true,
             total: true,
+            status: true,
+            createdAt: true,
           },
         },
       },
@@ -42,8 +45,13 @@ export async function createCustomer(data: {
 
     return {
       ...customer,
-      totalOrders: 0,
+      orders: customer.orders.map(order => ({
+        ...order,
+        total: Number(order.total)
+      })),
+      orderCount: 0,
       totalSpent: 0,
+      lastOrderDate: null,
     } as CustomerResponse;
   } catch (error) {
     console.error("Error creating customer:", error);

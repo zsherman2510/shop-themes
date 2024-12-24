@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus, Edit, Trash } from "lucide-react";
-import { Categories } from "@prisma/client";
 import {
   createCategory,
   deleteCategory,
@@ -26,16 +25,9 @@ interface CategoriesTableProps {
     total: number;
     pageCount: number;
   };
-  searchParams: {
-    search?: string;
-    page: string;
-  };
 }
 
-export default function CategoriesTable({
-  initialData,
-  searchParams,
-}: CategoriesTableProps) {
+export default function CategoriesTable({ initialData }: CategoriesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     CategoryWithCount | undefined
@@ -120,6 +112,10 @@ export default function CategoriesTable({
     setSelectedCategory(category);
     setIsModalOpen(true);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -230,7 +226,6 @@ export default function CategoriesTable({
           }
         }}
         category={selectedCategory}
-        isLoading={isLoading}
       />
     </>
   );

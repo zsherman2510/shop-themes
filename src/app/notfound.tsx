@@ -7,7 +7,8 @@ export default function NotFound() {
         <div className="max-w-md">
           <h1 className="text-5xl font-bold text-base-content">404</h1>
           <p className="py-6 text-base-content/70">
-            Oops! The page you're looking for doesn't exist or has been moved.
+            Oops! The page you&apos;re looking for doesn&apos;t exist or has
+            been moved.
           </p>
           <Link href="/" className="btn btn-primary">
             Return Home

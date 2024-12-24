@@ -59,13 +59,23 @@ export default function PageTable({
   };
 
   const handlePageChange = (page: number) => {
+    setIsLoading(true);
     const queryString = createQueryString({
       search: searchValue || undefined,
       status: statusValue || undefined,
       page: String(page),
     });
     router.push(`/admin/pages?${queryString}`);
+    setIsLoading(false);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <>

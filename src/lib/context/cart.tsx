@@ -3,7 +3,7 @@
 import { ProductWithPrice } from "@/app/_actions/store/products";
 import { createContext, useContext, useEffect, useState } from "react";
 
-export interface CartItem extends ProductWithPrice {
+interface CartItem extends ProductWithPrice {
   quantity: number;
 }
 

@@ -2,15 +2,16 @@ import { getPage } from "../actions/get";
 import PageForm from "../components/PageForm";
 import { notFound } from "next/navigation";
 
+type tParams = Promise<{ id: string }>;
+
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: tParams;
 }
 
 export default async function EditPagePage({ params }: PageProps) {
   try {
-    const page = await getPage(params.id);
+    const { id } = await params;
+    const page = await getPage(id);
 
     // Check if the page was found
     if (!page) {

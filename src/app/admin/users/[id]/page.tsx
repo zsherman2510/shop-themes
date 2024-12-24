@@ -2,15 +2,16 @@ import { getUser } from "../actions/get";
 import UserForm from "../components/UserForm";
 import { notFound } from "next/navigation";
 
+type tParams = Promise<{ id: string }>;
+
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: tParams;
 }
 
 export default async function EditUserPage({ params }: PageProps) {
   try {
-    const user = await getUser(params.id);
+    const { id } = await params;
+    const user = await getUser(id);
 
     return (
       <div className="flex flex-col gap-6">

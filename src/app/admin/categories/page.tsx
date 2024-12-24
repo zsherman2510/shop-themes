@@ -1,22 +1,7 @@
 import { getCategoriesForAdmin } from "./actions/categories";
 import CategoriesTable from "./components/CategoriesTable";
 
-interface CategoriesPageProps {
-  searchParams: {
-    page?: string;
-    search?: string;
-  };
-}
-
-export default async function CategoriesPage({
-  searchParams,
-}: CategoriesPageProps) {
-  const params = await Promise.resolve(searchParams);
-  const defaultSearchParams = {
-    page: params.page || "1",
-    search: params.search,
-  };
-
+export default async function CategoriesPage() {
   const data = await getCategoriesForAdmin();
 
   return (
@@ -28,7 +13,7 @@ export default async function CategoriesPage({
         </p>
       </div>
 
-      <CategoriesTable initialData={data} searchParams={defaultSearchParams} />
+      <CategoriesTable initialData={data} />
     </div>
   );
 }

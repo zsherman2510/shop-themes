@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export const isAdminOrTeam = async () => {
   const session = await getServerSession(authOptions);
   
-  const dbUser = await prisma.users.findUnique({
+  const dbUser = await prisma.user.findUnique({
     where: {
       id: session?.user.id
     },

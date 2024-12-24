@@ -10,7 +10,6 @@ import {
   getRecentOrders,
   revalidateDashboard,
 } from "@/app/admin/dashboard/actions/dashboard";
-import { getOrderStatusStyle } from "@/lib/utils/utils";
 
 export default async function DashboardPage() {
   const [stats, recentOrders] = await Promise.all([

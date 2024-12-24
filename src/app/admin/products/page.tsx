@@ -3,7 +3,11 @@ import { getProducts } from "./actions/get";
 import ProductsTable from "./components/ProductsTable";
 
 // Type for search params
-type SearchParams = { [key: string]: string | string[] | undefined };
+type SearchParams = Promise<{
+  search: string;
+  categoryId: string;
+  page: string;
+}>;
 
 // Page props interface
 interface PageProps {
@@ -12,19 +16,13 @@ interface PageProps {
 
 export default async function ProductsPage({ searchParams }: PageProps) {
   // Await and parse search params
-  const params = await Promise.resolve(searchParams);
-
-  // Parse search params safely
-  const search = typeof params.search === "string" ? params.search : "";
-  const categoryId =
-    typeof params.categoryId === "string" ? params.categoryId : undefined;
-  const page = typeof params.page === "string" ? Number(params.page) : 1;
+  const { search, categoryId, page } = await searchParams;
 
   // Fetch data server-side
   const productsData = await getProducts({
     search,
     categoryId,
-    page,
+    page: Number(page),
     limit: 10,
   });
 
@@ -43,7 +41,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
       <ProductsTable
         initialData={productsData}
-        categories={categories}
+        categories={categories.categories}
         searchParams={{
           search,
           categoryId,
