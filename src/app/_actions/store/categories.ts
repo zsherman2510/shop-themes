@@ -53,8 +53,6 @@ export async function getCategories({
     prisma.categories.count({ where }),
   ]);
 
-  console.log(categories, "a");
-
   return {
     categories,
     total: count,

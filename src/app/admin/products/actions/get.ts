@@ -40,10 +40,11 @@ export async function getProducts({
   limit?: number;
 } = {}) {
   try {
-    // Ensure page and limit are numbers and have minimum values
-    const skip = 10;
-    const take = 10;
-    console.log(skip, take, "skip, take");
+    // Ensure values are numbers and have fallbacks
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
+    const take = validLimit;
 
     const where: Prisma.ProductsWhereInput = {
       ...(search && {
@@ -95,7 +96,6 @@ export async function getProducts({
       ...product,
       price: Number(product.price),
     }));
-    console.log(formattedProducts, "formattedProducts");
 
     return {
       products: formattedProducts,

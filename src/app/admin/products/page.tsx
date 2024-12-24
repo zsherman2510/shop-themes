@@ -26,6 +26,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     limit: 10,
   });
 
+  console.log(productsData, "productsData");
+
   const categories = await getCategories();
 
   return (
