@@ -4,6 +4,7 @@ import Hero from "@/components/store/home/hero";
 import Categories from "@/components/store/home/categories";
 import FeaturedProducts from "@/components/store/home/featured-products";
 import Newsletter from "@/components/store/home/newsletter";
+import Navbar from "@/components/layout/navbar";
 
 export default async function HomePage() {
   const { categories } = await getCategories();
@@ -11,6 +12,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <Navbar />
       <Hero />
       <Categories categories={categories} />
       <FeaturedProducts products={featuredProducts} />

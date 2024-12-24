@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ProductWithPrice } from "@/app/_actions/store/products";
 import { useCart } from "@/components/store/cart/cart-provider";
