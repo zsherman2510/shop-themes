@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, PaymentStatus, ProductType } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
+import { sendOrderConfirmationEmail, sendDigitalProductDeliveryEmail } from "@/lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -16,15 +17,26 @@ function formatDecimal(amount: number): Decimal {
   return new Decimal(amount.toFixed(2));
 }
 
-async function sendOrderConfirmationEmail(order: any, items: any[], customerEmail: string) {
-  // TODO: Implement your email service here
-  console.log("Sending order confirmation email to:", customerEmail, {
-    orderNumber: order.orderNumber,
-    items: items,
-  });
+async function handleOrderConfirmation(order: any, items: any[], customerEmail: string, customerName?: string) {
+  try {
+    await sendOrderConfirmationEmail({
+      customerEmail,
+      customerName,
+      orderNumber: order.orderNumber,
+      items: items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price)
+      })),
+      total: parseFloat(order.total.toString())
+    });
+    console.log("Order confirmation email sent successfully");
+  } catch (error) {
+    console.error("Error sending order confirmation email:", error);
+  }
 }
 
-async function handleDigitalProductDelivery(items: any[], customerEmail: string) {
+async function handleDigitalProductDelivery(items: any[], customerEmail: string, orderNumber: string, customerName?: string) {
   try {
     // Get all digital products from the order
     const productIds = items.map(item => item.id);
@@ -42,13 +54,16 @@ async function handleDigitalProductDelivery(items: any[], customerEmail: string)
     });
 
     if (digitalProducts.length > 0) {
-      // TODO: Implement your email service here
-      console.log("Sending digital product delivery email to:", customerEmail, {
+      await sendDigitalProductDeliveryEmail({
+        customerEmail,
+        customerName,
+        orderNumber,
         products: digitalProducts.map(p => ({
           name: p.name,
-          downloadUrl: p.fileUrl,
-        })),
+          downloadUrl: p.fileUrl || ''
+        }))
       });
+      console.log("Digital product delivery email sent successfully");
     }
   } catch (error) {
     console.error("Error handling digital product delivery:", error);
@@ -118,6 +133,23 @@ export async function POST(req: Request) {
         const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
         try {
+          // Create or find customer
+          let dbCustomer = await prisma.customers.findUnique({
+            where: { email: customer?.email! }
+          });
+
+          if (!dbCustomer && customer?.email) {
+            dbCustomer = await prisma.customers.create({
+              data: {
+                email: customer.email,
+                firstName: customer.name?.split(' ')[0] || null,
+                lastName: customer.name?.split(' ').slice(1).join(' ') || null,
+                status: "ACTIVE"
+              }
+            });
+            console.log("Created new customer:", dbCustomer);
+          }
+
           // Create the order with the correct payment status based on session status
           const order = await prisma.orders.create({
             data: {
@@ -126,8 +158,9 @@ export async function POST(req: Request) {
               status: session.payment_status === "paid" ? OrderStatus.PROCESSING : OrderStatus.PENDING,
               paymentStatus: session.payment_status === "paid" ? PaymentStatus.PAID : PaymentStatus.PENDING,
               paymentIntent: session.payment_intent as string,
-              guestEmail: customer?.email,
-              guestName: customer?.name,
+              customerId: dbCustomer?.id,
+              guestEmail: !dbCustomer ? customer?.email : null,
+              guestName: !dbCustomer ? customer?.name : null,
               items: {
                 create: items.map((item: any) => ({
                   productId: item.id,
@@ -140,10 +173,31 @@ export async function POST(req: Request) {
 
           console.log("Created order:", order);
 
-          // If payment is already successful, handle digital delivery
+          // If payment is already successful, handle emails and delivery
           if (session.payment_status === "paid" && customer?.email) {
-            await sendOrderConfirmationEmail(order, items, customer.email);
-            await handleDigitalProductDelivery(items, customer.email);
+            await handleOrderConfirmation(
+              order,
+              items,
+              customer.email,
+              customer.name || undefined
+            );
+            
+            await handleDigitalProductDelivery(
+              items,
+              customer.email,
+              orderNumber,
+              customer.name || undefined
+            );
+            
+            // Update order status to DELIVERED after emails are sent
+            await prisma.orders.update({
+              where: { id: order.id },
+              data: {
+                status: OrderStatus.DELIVERED,
+              },
+            });
+            
+            console.log("Updated order status to DELIVERED:", order.id);
           }
 
           return NextResponse.json({ success: true });
@@ -161,7 +215,7 @@ export async function POST(req: Request) {
         const updatedOrder = await prisma.orders.updateMany({
           where: { 
             paymentIntent: paymentIntent.id,
-            paymentStatus: { not: PaymentStatus.PAID } // Only update if not already paid
+            paymentStatus: { not: PaymentStatus.PAID }
           },
           data: {
             paymentStatus: PaymentStatus.PAID,
@@ -175,12 +229,54 @@ export async function POST(req: Request) {
           // Get the order details to send confirmation email
           const order = await prisma.orders.findFirst({
             where: { paymentIntent: paymentIntent.id },
-            include: { items: true },
+            include: { 
+              items: {
+                include: {
+                  product: true
+                }
+              },
+              customer: true 
+            },
           });
 
-          if (order && order.guestEmail) {
-            await sendOrderConfirmationEmail(order, order.items, order.guestEmail);
-            await handleDigitalProductDelivery(order.items, order.guestEmail);
+          if (order) {
+            const emailToUse = order.customer?.email || order.guestEmail;
+            const nameToUse = order.customer?.firstName 
+              ? `${order.customer.firstName} ${order.customer.lastName || ''}`
+              : order.guestName || undefined;
+
+            if (emailToUse) {
+              await handleOrderConfirmation(
+                order,
+                order.items.map(item => ({
+                  ...item,
+                  name: item.product.name,
+                  price: parseFloat(item.price.toString())
+                })),
+                emailToUse,
+                nameToUse
+              );
+
+              await handleDigitalProductDelivery(
+                order.items.map(item => ({
+                  ...item.product,
+                  price: parseFloat(item.price.toString())
+                })),
+                emailToUse,
+                order.orderNumber,
+                nameToUse
+              );
+              
+              // Update order status to DELIVERED after emails are sent
+              await prisma.orders.update({
+                where: { id: order.id },
+                data: {
+                  status: OrderStatus.DELIVERED,
+                },
+              });
+              
+              console.log("Updated order status to DELIVERED:", order.id);
+            }
           }
         }
         break;
