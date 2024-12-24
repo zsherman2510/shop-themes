@@ -62,7 +62,8 @@ export async function getOrders({
   limit?: number;
 }) {
   try {
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit || 0;
+    const take = limit || 10;
 
     const where: Prisma.OrdersWhereInput = {
       ...(search && {
@@ -102,7 +103,7 @@ export async function getOrders({
           updatedAt: true,
         },
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take,
         skip,
       }),
       prisma.orders.count({ where }),

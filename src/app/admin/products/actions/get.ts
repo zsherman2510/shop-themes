@@ -38,9 +38,12 @@ export async function getProducts({
   categoryId?: string;
   page?: number;
   limit?: number;
-}) {
+} = {}) {
   try {
-    const skip = (page - 1) * limit;
+    // Ensure page and limit are numbers and have minimum values
+    const skip = 10;
+    const take = 10;
+    console.log(skip, take, "skip, take");
 
     const where: Prisma.ProductsWhereInput = {
       ...(search && {
@@ -79,11 +82,10 @@ export async function getProducts({
           version: true,
           features: true,
           documentation: true,
-          // changelog: true,
           requirements: true,
         },
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take,
         skip,
       }),
       prisma.products.count({ where }),

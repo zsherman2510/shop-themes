@@ -16,7 +16,8 @@ export async function getUsers({
   limit?: number;
 }) {
   try {
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit || 0;
+    const take = limit || 10;
 
     const where: Prisma.UserWhereInput = {
       role: role || { in: [UserRole.ADMIN, UserRole.TEAM] },
@@ -34,7 +35,7 @@ export async function getUsers({
       prisma.user.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take,
         skip,
         select: {
           id: true,
