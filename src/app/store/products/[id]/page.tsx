@@ -1,48 +1,29 @@
-"use client";
-import { use } from "react";
 import { getProduct } from "@/app/_actions/store/products";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
-import { Eye, ShoppingCart } from "lucide-react";
+import { Eye } from "lucide-react";
 import Image from "next/image";
-import { useCart } from "@/components/store/cart/cart-provider";
-import { useEffect, useState } from "react";
-import { ProductWithPrice } from "@/app/_actions/store/products";
+import AddToCartButton from "@/app/store/products/components/AddToCartButton";
+// import ProductReviews from "../components/ProductReviews";
+
+type tParams = Promise<{ id: string }>;
+
+interface ProductPageProps {
+  params: tParams;
+}
 
 const placeholderImage = "https://placehold.co/600x400";
 
-export default function ProductPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const { addItem } = useCart();
-  const [product, setProduct] = useState<ProductWithPrice | null>(null);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      const fetchedProduct = await getProduct(id);
-      if (!fetchedProduct) {
-        notFound();
-      }
-      setProduct(fetchedProduct);
-    };
-    fetchProduct();
-  }, [id]);
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+  const product = await getProduct(id);
 
   if (!product) {
-    return <div>Loading...</div>;
+    notFound();
   }
-
-  const handleAddToCart = () => {
-    addItem(product);
-    const event = new CustomEvent("openCart");
-    window.dispatchEvent(event);
-  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -53,7 +34,9 @@ export default function ProductPage({
             <img
               src={product?.images[0] || placeholderImage}
               alt={product.name}
-              className="h-full w-full object-cover object-center group-hover:opacity-75"
+              width={600}
+              height={400}
+              className="h-full w-full object-cover object-center"
             />
           </div>
           {product.images.length > 1 && (
@@ -107,10 +90,7 @@ export default function ProductPage({
           )}
 
           <div className="space-y-4">
-            <Button className="w-full" size="lg" onClick={handleAddToCart}>
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
+            <AddToCartButton product={product} />
 
             {product.previewUrl && (
               <Button variant="outline" className="w-full" asChild>
@@ -147,6 +127,11 @@ export default function ProductPage({
           )}
         </div>
       </div>
+
+      {/* Reviews Section */}
+      {/* <div className="mt-16">
+        <ProductReviews productId={product.id} />
+      </div> */}
     </div>
   );
 }

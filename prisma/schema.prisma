@@ -94,6 +94,7 @@ model Products {
   category      Categories?        @relation(fields: [categoryId], references: [id])
   downloads     ProductDownloads[]
   licenses      ProductLicenses[]
+  reviews       Reviews[]
 
   @@index([categoryId])
   @@index([sku])
@@ -373,6 +374,7 @@ model Customers {
   orders    Orders[]
   downloads ProductDownloads[]
   licenses  ProductLicenses[]
+  Reviews   Reviews[]
 }
 
 model ProductDownloads {
@@ -413,6 +415,24 @@ model ProductLicenses {
   @@index([productId])
   @@index([customerId])
   @@index([orderNumber])
+}
+
+model Reviews {
+  id        String   @id @default(cuid())
+  rating    Int      @db.SmallInt
+  comment   String?  @db.Text
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product    Products   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  customer   Customers? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?
+
+  @@index([productId])
+  @@index([customerId])
 }
 
 enum UserRole {
