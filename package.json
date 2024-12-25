@@ -8,7 +8,8 @@
     "postbuild": "next-sitemap && prisma generate && prisma migrate deploy",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma migrate deploy",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
