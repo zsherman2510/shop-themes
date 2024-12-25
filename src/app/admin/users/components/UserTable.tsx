@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { AdminUserResponse } from "@/types/admin";
-import { formatDate } from "@/lib/utils/";
+import { formatDate } from "@/lib/utils/index";
 import { UserRole, UserStatus } from "@prisma/client";
 import UserModal from "./UserModal";
 import { createUser } from "../actions/create";
