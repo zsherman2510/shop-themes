@@ -31,8 +31,10 @@ async function handleOrderConfirmation(order: any, items: any[], customerEmail: 
       total: parseFloat(order.total.toString())
     });
     console.log("Order confirmation email sent successfully");
+    return true;
   } catch (error) {
     console.error("Error sending order confirmation email:", error);
+    return false;
   }
 }
 
@@ -64,9 +66,12 @@ async function handleDigitalProductDelivery(items: any[], customerEmail: string,
         }))
       });
       console.log("Digital product delivery email sent successfully");
+      return true;
     }
+    return true; // Return true if there are no digital products
   } catch (error) {
     console.error("Error handling digital product delivery:", error);
+    return false;
   }
 }
 
@@ -134,9 +139,12 @@ export async function POST(req: Request) {
 
         try {
           // Create or find customer
-          let dbCustomer = await prisma.customers.findUnique({
-            where: { email: customer?.email! }
-          });
+          let dbCustomer = null;
+          if (customer?.email) {
+            dbCustomer = await prisma.customers.findUnique({
+              where: { email: customer.email }
+            });
+          }
 
           if (!dbCustomer && customer?.email) {
             dbCustomer = await prisma.customers.create({
@@ -175,29 +183,37 @@ export async function POST(req: Request) {
 
           // If payment is already successful, handle emails and delivery
           if (session.payment_status === "paid" && customer?.email) {
-            await handleOrderConfirmation(
+            const confirmationSent = await handleOrderConfirmation(
               order,
               items,
               customer.email,
               customer.name || undefined
             );
             
-            await handleDigitalProductDelivery(
+            const deliverySent = await handleDigitalProductDelivery(
               items,
               customer.email,
               orderNumber,
               customer.name || undefined
             );
             
-            // Update order status to DELIVERED after emails are sent
-            await prisma.orders.update({
-              where: { id: order.id },
-              data: {
-                status: OrderStatus.DELIVERED,
-              },
-            });
-            
-            console.log("Updated order status to DELIVERED:", order.id);
+            // Only update to DELIVERED if both emails were sent successfully
+            if (confirmationSent && deliverySent) {
+              await prisma.orders.update({
+                where: { id: order.id },
+                data: {
+                  status: OrderStatus.DELIVERED,
+                },
+              });
+              console.log("Updated order status to DELIVERED:", order.id);
+            } else {
+              await prisma.orders.update({
+                where: { id: order.id },
+                data: {
+                  status: OrderStatus.PENDING,
+                },
+              });
+            }
           }
 
           return NextResponse.json({ success: true });
@@ -246,7 +262,7 @@ export async function POST(req: Request) {
               : order.guestName || undefined;
 
             if (emailToUse) {
-              await handleOrderConfirmation(
+              const confirmationSent = await handleOrderConfirmation(
                 order,
                 order.items.map(item => ({
                   ...item,
@@ -257,7 +273,7 @@ export async function POST(req: Request) {
                 nameToUse
               );
 
-              await handleDigitalProductDelivery(
+              const deliverySent = await handleDigitalProductDelivery(
                 order.items.map(item => ({
                   ...item.product,
                   price: parseFloat(item.price.toString())
@@ -267,15 +283,16 @@ export async function POST(req: Request) {
                 nameToUse
               );
               
-              // Update order status to DELIVERED after emails are sent
-              await prisma.orders.update({
-                where: { id: order.id },
-                data: {
-                  status: OrderStatus.DELIVERED,
-                },
-              });
-              
-              console.log("Updated order status to DELIVERED:", order.id);
+              // Only update to DELIVERED if both emails were sent successfully
+              if (confirmationSent && deliverySent) {
+                await prisma.orders.update({
+                  where: { id: order.id },
+                  data: {
+                    status: OrderStatus.DELIVERED,
+                  },
+                });
+                console.log("Updated order status to DELIVERED:", order.id);
+              }
             }
           }
         }

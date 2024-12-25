@@ -1,4 +1,4 @@
-const SibApiV3Sdk = require("@getbrevo/brevo");
+import * as SibApiV3Sdk from '@getbrevo/brevo';
 
 // Initialize Brevo API instance
 const apiKey = process.env.BREVO_API_KEY;
@@ -9,7 +9,7 @@ if (!apiKey) {
 
 // Create API instance
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-apiInstance.setApiKey(SibApiV3Sdk.AccountApiApiKeys.apiKey, apiKey);
+apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
 // Default sender configuration
 const DEFAULT_SENDER = {
