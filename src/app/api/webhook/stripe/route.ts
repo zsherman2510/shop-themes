@@ -152,7 +152,7 @@ export async function POST(req: Request) {
                 email: customer.email,
                 firstName: customer.name?.split(' ')[0] || null,
                 lastName: customer.name?.split(' ').slice(1).join(' ') || null,
-                status: "ACTIVE"
+                isSubscribed: true,
               }
             });
             console.log("Created new customer:", dbCustomer);

@@ -362,19 +362,20 @@ model ShippingRates {
 }
 
 model Customers {
-  id        String             @id @default(cuid())
-  email     String             @unique
-  firstName String?
-  lastName  String?
-  phone     String?
-  status    String             @default("ACTIVE")
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  addresses Addresses[]
-  orders    Orders[]
-  downloads ProductDownloads[]
-  licenses  ProductLicenses[]
-  Reviews   Reviews[]
+  id               String             @id @default(cuid())
+  email            String             @unique
+  firstName        String?
+  lastName         String?
+  phone            String?
+  metadata         Json?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  isSubscribed     Boolean            @default(false)
+  addresses        Addresses[]
+  orders           Orders[]
+  reviews          Reviews[]
+  ProductDownloads ProductDownloads[]
+  ProductLicenses  ProductLicenses[]
 }
 
 model ProductDownloads {

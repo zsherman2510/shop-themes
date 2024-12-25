@@ -99,17 +99,15 @@ export default async function CustomerPage({ params }: { params: tParams }) {
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  Status
+                  Newsletter Subscription
                 </label>
                 <p className="mt-1">
                   <span
                     className={`badge ${
-                      customer.status === "ACTIVE"
-                        ? "badge-success"
-                        : "badge-warning"
+                      customer.isSubscribed ? "badge-success" : "badge-warning"
                     }`}
                   >
-                    {customer.status}
+                    {customer.isSubscribed ? "Subscribed" : "Not Subscribed"}
                   </span>
                 </p>
               </div>

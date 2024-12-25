@@ -25,7 +25,7 @@ export async function deleteCustomer(id: string) {
       await prisma.customers.update({
         where: { id },
         data: {
-          status: "INACTIVE",
+          isSubscribed: false,
         },
       });
     } else {

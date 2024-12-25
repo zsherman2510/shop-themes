@@ -38,7 +38,7 @@ export async function updateCustomer(
         phone: true,
         createdAt: true,
         updatedAt: true,
-        status: true,
+        isSubscribed: true,
         orders: {
           select: {
             total: true,

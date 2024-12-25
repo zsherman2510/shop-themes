@@ -11,7 +11,7 @@ export type CustomerResponse = {
   phone: string | null;
   createdAt: Date;
   updatedAt: Date;
-  status: string;
+  isSubscribed: boolean;
   orderCount: number;
   totalSpent: number;
   lastOrderDate: Date | null;
@@ -75,7 +75,7 @@ export async function getCustomers({
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       phone: customer.phone,
-      status: customer.status,
+      isSubscribed: customer.isSubscribed,
       orderCount: customer.orders.length,
       totalSpent: customer.orders.reduce((sum, order) => sum + (order.total ? Number(order.total) : 0), 0),
       lastOrderDate: customer.orders[0]?.createdAt ?? null,
@@ -123,7 +123,7 @@ export async function getCustomer(id: string): Promise<CustomerResponse> {
       phone: customer.phone,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
-      status: customer.status,
+      isSubscribed: customer.isSubscribed,
       orderCount: customer.orders.length,
       totalSpent: customer.orders.reduce((sum, order) => sum + Number(order.total), 0),
       lastOrderDate: customer.orders[0]?.createdAt ?? null,

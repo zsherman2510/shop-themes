@@ -21,7 +21,7 @@ export async function createCustomer(data: {
     const customer = await prisma.customers.create({
       data: {
         ...data,
-        status: "ACTIVE",
+        isSubscribed: true,
       },
       select: {
         id: true,
@@ -31,7 +31,7 @@ export async function createCustomer(data: {
         phone: true,
         createdAt: true,
         updatedAt: true,
-        status: true,
+        isSubscribed: true,
         orders: {
           select: {
             id: true,

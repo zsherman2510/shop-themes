@@ -81,7 +81,9 @@ export default function CustomersTable({
                 <th className="text-base-content/70">Orders</th>
                 <th className="text-base-content/70">Total Spent</th>
                 <th className="text-base-content/70">Last Order</th>
-                <th className="text-base-content/70">Status</th>
+                <th className="text-base-content/70">
+                  Newsletter Subscription
+                </th>
                 <th className="text-base-content/70">Joined</th>
               </tr>
             </thead>
@@ -111,12 +113,14 @@ export default function CustomersTable({
                     <td>
                       <span
                         className={`badge ${
-                          customer.status === "ACTIVE"
+                          customer.isSubscribed
                             ? "badge-success"
                             : "badge-warning"
                         }`}
                       >
-                        {customer.status}
+                        {customer.isSubscribed
+                          ? "Subscribed"
+                          : "Not Subscribed"}
                       </span>
                     </td>
                     <td className="text-base-content/70">

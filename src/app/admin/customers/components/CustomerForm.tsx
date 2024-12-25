@@ -24,7 +24,7 @@ export default function CustomerForm({
       firstName: defaultValues?.firstName || "",
       lastName: defaultValues?.lastName || "",
       phone: defaultValues?.phone || "",
-      status: defaultValues?.status || "ACTIVE",
+      isSubscribed: defaultValues?.isSubscribed || true,
     },
   });
 
@@ -89,11 +89,11 @@ export default function CustomerForm({
             <span className="label-text">Status</span>
           </label>
           <select
-            {...register("status")}
+            {...register("isSubscribed")}
             className="select select-bordered w-full"
           >
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
+            <option value="true">Subscribed</option>
+            <option value="false">Not Subscribed</option>
           </select>
         </div>
       )}
