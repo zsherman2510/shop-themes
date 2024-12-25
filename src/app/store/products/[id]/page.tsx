@@ -77,13 +77,47 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p>{product.description}</p>
           </div>
 
-          {product.features && (
+          {product.features && product.features.length > 0 && (
             <>
               <Separator />
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Features</h3>
-                <div className="prose dark:prose-invert">
-                  {product.features}
+                <h3 className="text-xl font-semibold">Features</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Array.isArray(product.features)
+                    ? product.features.map((feature, index) => {
+                        // Clean up the feature text by removing brackets, quotes, and extra whitespace
+                        const cleanFeature = feature
+                          .replace(/[\[\]"]/g, "") // Remove brackets and quotes
+                          .trim(); // Remove extra whitespace
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg"
+                          >
+                            <span className="text-green-500 shrink-0">
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </span>
+                            <span className="text-sm font-medium">
+                              {cleanFeature}
+                            </span>
+                          </div>
+                        );
+                      })
+                    : null}
                 </div>
               </div>
             </>
