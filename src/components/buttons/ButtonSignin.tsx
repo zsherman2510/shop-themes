@@ -20,7 +20,9 @@ const ButtonSignin = ({
         <div
           tabIndex={0}
           role="button"
-          className={`btn btn-ghost ${extraStyle ? extraStyle : ""}`}
+          className={`btn btn-primary text-base-content ${
+            extraStyle ? extraStyle : ""
+          }`}
         >
           {session.user?.image ? (
             <img
@@ -30,7 +32,7 @@ const ButtonSignin = ({
               referrerPolicy="no-referrer"
             />
           ) : (
-            <User className="w-6 h-6" />
+            <User className="w-6 h-6 text-base-content" />
           )}
           <span className="hidden md:inline text-base-content">
             {session.user?.name?.split(" ")[0] || "Account"}
@@ -53,7 +55,7 @@ const ButtonSignin = ({
 
   return (
     <button
-      className={`btn btn-ghost ${extraStyle ? extraStyle : ""}`}
+      className={`btn btn-ghost text-base-content ${extraStyle ? extraStyle : ""}`}
       onClick={() => signIn()}
     >
       <User className="w-6 h-6" />

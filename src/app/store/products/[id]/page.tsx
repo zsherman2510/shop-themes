@@ -1,6 +1,5 @@
 import { getProduct } from "@/app/_actions/store/products";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
@@ -26,7 +25,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-base-content">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
         <div className="space-y-4">
@@ -62,8 +61,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">{product.category?.name}</Badge>
-              <Badge variant="outline">Version {product.version}</Badge>
+              <Badge variant="outline" className="text-base-content">
+                {product.category?.name}
+              </Badge>
+              <Badge variant="outline" className="text-base-content">
+                Version {product.version}
+              </Badge>
             </div>
             <h1 className="text-3xl font-bold mt-2">{product.name}</h1>
             <p className="text-2xl font-bold mt-2">
@@ -93,7 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         return (
                           <div
                             key={index}
-                            className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg"
+                            className="flex items-center gap-3 p-3 rounded-lg"
                           >
                             <span className="text-green-500 shrink-0">
                               <svg
@@ -127,20 +130,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <AddToCartButton product={product} />
 
             {product.previewUrl && (
-              <Button variant="outline" className="w-full" asChild>
-                <a
-                  href={product.previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Live Preview
-                </a>
-              </Button>
+              <a
+                href={product.previewUrl}
+                target="_blank"
+                className="btn btn-outline w-full"
+                rel="noopener noreferrer"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Live Preview
+              </a>
             )}
 
             {/* Optional: Add purchase benefits */}
-            <Card className="p-4 bg-muted/50">
+            <Card className="p-4">
               <h3 className="font-semibold mb-2">What&apos;s included:</h3>
               <ul className="space-y-2 text-sm">
                 <li>✓ Full source code</li>
